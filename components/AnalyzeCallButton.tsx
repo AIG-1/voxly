@@ -2,75 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase-browser";
 
 interface AnalyzeCallButtonProps {
   callId: string;
   audioUrl: string | null;
   variant?: "default" | "large";
-}
-
-// Lightweight AssemblyAI client running browser-side
-// API key stored in platform_config table (Option D — MVP)
-async function transcribeWithAssemblyAI(audioUrl: string, apiKey: string) {
-  // 1. Submit transcript job
-  const submitRes = await fetch("https://api.assemblyai.com/v2/transcript", {
-    method: "POST",
-    headers: { authorization: apiKey, "content-type": "application/json" },
-    body: JSON.stringify({
-      audio_url: audioUrl,
-      speaker_labels: true,
-      auto_chapters: false,
-    }),
-  });
-  const { id } = await submitRes.json();
-
-  // 2. Poll until complete (max 3 minutes)
-  for (let i = 0; i < 36; i++) {
-    await new Promise((r) => setTimeout(r, 5000));
-    const pollRes = await fetch(`https://api.assemblyai.com/v2/transcript/${id}`, {
-      headers: { authorization: apiKey },
-    });
-    const data = await pollRes.json();
-    if (data.status === "completed") return data;
-    if (data.status === "error") throw new Error(data.error);
-  }
-  throw new Error("Transcription timed out");
-}
-
-function calcTalkRatios(utterances: Array<{ speaker: string; text: string }>) {
-  const words: Record<string, number> = {};
-  for (const u of utterances) {
-    words[u.speaker] = (words[u.speaker] ?? 0) + u.text.split(" ").length;
-  }
-  const speakers = Object.keys(words);
-  if (speakers.length < 2) return { rep: 50, customer: 50 };
-  // Assume first speaker is rep
-  const total = Object.values(words).reduce((a, b) => a + b, 0);
-  const repWords = words[speakers[0]];
-  return {
-    rep: Math.round((repWords / total) * 100),
-    customer: Math.round(((total - repWords) / total) * 100),
-  };
-}
-
-async function analyzeWithClaude(transcript: string): Promise<{
-  coaching_score: number;
-  coaching_feedback: string;
-  topics: string[];
-  objections: string[];
-  buying_signals: string[];
-  next_steps: string[];
-  outcome: string;
-}> {
-  // Call our own API route that uses Claude
-  const res = await fetch("/api/analyze", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ transcript }),
-  });
-  if (!res.ok) throw new Error("Analysis failed");
-  return res.json();
 }
 
 export default function AnalyzeCallButton({
@@ -80,7 +16,7 @@ export default function AnalyzeCallButton({
 }: AnalyzeCallButtonProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState("");
+  const [statusMsg, setStatusMsg] = useState("");
 
   const handleAnalyze = async () => {
     if (!audioUrl) {
@@ -89,65 +25,56 @@ export default function AnalyzeCallButton({
     }
 
     setLoading(true);
-    setStatus("Fetching API key…");
-
-    const supabase = createClient();
-
-    // Fetch AssemblyAI key from platform_config
-    const { data: config } = await supabase
-      .from("platform_config")
-      .select("assemblyai_api_key")
-      .limit(1)
-      .single();
-
-    if (!config?.assemblyai_api_key) {
-      alert("AssemblyAI API key not configured. Go to Settings → Platform Config.");
-      setLoading(false);
-      return;
-    }
-
-    // Update status to transcribing
-    await supabase
-      .from("calls")
-      .update({ status: "transcribing" })
-      .eq("id", callId);
-
-    setStatus("Transcribing audio (1–2 min)…");
+    setStatusMsg("Starting transcription…");
 
     try {
-      const transcriptData = await transcribeWithAssemblyAI(audioUrl, config.assemblyai_api_key);
+      // 1. Submit job server-side (key never touches browser)
+      const startRes = await fetch("/api/transcribe/start", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ callId }),
+      });
 
-      const utterances = transcriptData.utterances ?? [];
-      const transcript = transcriptData.text ?? "";
-      const duration = transcriptData.audio_duration ?? null;
-      const { rep, customer } = calcTalkRatios(utterances);
+      if (!startRes.ok) {
+        const { error } = await startRes.json();
+        throw new Error(error ?? "Failed to start transcription");
+      }
 
-      // Update with transcription, move to analyzing
-      await supabase.from("calls").update({
-        transcript,
-        utterances,
-        duration_seconds: duration,
-        talk_ratio_rep: rep,
-        talk_ratio_customer: customer,
-        status: "analyzing",
-      }).eq("id", callId);
+      const { transcriptId } = await startRes.json();
+      setStatusMsg("Transcribing audio (1–2 min)…");
 
-      setStatus("Running AI analysis…");
+      // 2. Poll every 5 seconds — server does the AssemblyAI call
+      for (let i = 0; i < 36; i++) {
+        await new Promise((r) => setTimeout(r, 5000));
 
-      // AI analysis
-      const analysis = await analyzeWithClaude(transcript);
+        const pollRes = await fetch("/api/transcribe/poll", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ transcriptId, callId }),
+        });
 
-      await supabase.from("calls").update({
-        ...analysis,
-        status: "completed",
-      }).eq("id", callId);
+        if (!pollRes.ok) {
+          const { error } = await pollRes.json().catch(() => ({}));
+          throw new Error(error ?? "Poll request failed");
+        }
 
-      setStatus("Done!");
-      router.refresh();
+        const { status, error } = await pollRes.json();
+
+        if (status === "error") throw new Error(error ?? "Transcription failed");
+        if (status === "analyzing") setStatusMsg("Running AI analysis…");
+        if (status === "completed") {
+          setStatusMsg("Done!");
+          router.refresh();
+          setLoading(false);
+          return;
+        }
+      }
+
+      throw new Error("Transcription timed out — try again");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Unknown error";
-      await supabase.from("calls").update({ status: "error" }).eq("id", callId);
       alert("Analysis failed: " + msg);
+      router.refresh(); // refresh so status badge updates if DB was already changed
     }
 
     setLoading(false);
@@ -157,11 +84,20 @@ export default function AnalyzeCallButton({
     <button
       onClick={handleAnalyze}
       disabled={loading}
-      className={`bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white font-medium rounded-lg transition-colors ${
-        variant === "large" ? "px-6 py-3 text-base" : "px-4 py-2 text-sm"
-      }`}
+      style={{
+        background: loading ? "#4338ca" : "#4f46e5",
+        color: "#fff",
+        fontWeight: 500,
+        borderRadius: "8px",
+        border: "none",
+        cursor: loading ? "not-allowed" : "pointer",
+        opacity: loading ? 0.7 : 1,
+        transition: "background 0.15s",
+        padding: variant === "large" ? "12px 24px" : "8px 16px",
+        fontSize: variant === "large" ? "15px" : "13px",
+      }}
     >
-      {loading ? status || "Analyzing…" : "⚡ Analyze call"}
+      {loading ? statusMsg || "Analyzing…" : "⚡ Analyze call"}
     </button>
   );
 }
