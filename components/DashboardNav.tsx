@@ -9,16 +9,21 @@ interface DashboardNavProps {
   role: string;
 }
 
-const navItems = [
-  { href: "/dashboard", label: "Overview", icon: "◈" },
-  { href: "/dashboard/calls", label: "Calls", icon: "🎙" },
-  { href: "/dashboard/team", label: "Team", icon: "👥" },
-  { href: "/dashboard/settings", label: "Settings", icon: "⚙" },
-];
-
 export default function DashboardNav({ role }: DashboardNavProps) {
   const pathname = usePathname();
   const router = useRouter();
+
+  const isSuperAdmin = role === "super_admin";
+
+  const navItems = [
+    { href: "/dashboard",          label: "Overview", icon: "◈" },
+    { href: "/dashboard/calls",    label: "Calls",    icon: "🎙" },
+    { href: "/dashboard/team",     label: "Team",     icon: "👥" },
+    { href: "/dashboard/settings", label: "Settings", icon: "⚙" },
+    ...(isSuperAdmin
+      ? [{ href: "/dashboard/admin", label: "Admin", icon: "🛡" }]
+      : []),
+  ];
 
   const handleSignOut = async () => {
     const supabase = createClient();
@@ -28,33 +33,81 @@ export default function DashboardNav({ role }: DashboardNavProps) {
   };
 
   return (
-    <nav className="flex-1 p-3 space-y-0.5">
-      {navItems.map((item) => {
-        const isActive =
-          item.href === "/dashboard"
-            ? pathname === "/dashboard"
-            : pathname.startsWith(item.href);
+    <nav style={{ flex: 1, padding: "12px", display: "flex", flexDirection: "column" }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "2px" }}>
+        {navItems.map((item) => {
+          const isActive =
+            item.href === "/dashboard"
+              ? pathname === "/dashboard"
+              : pathname.startsWith(item.href);
 
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-              isActive
-                ? "bg-indigo-600 text-white"
-                : "text-gray-400 hover:text-white hover:bg-gray-800"
-            }`}
-          >
-            <span className="text-base">{item.icon}</span>
-            {item.label}
-          </Link>
-        );
-      })}
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                padding: "8px 12px",
+                borderRadius: "8px",
+                fontSize: "13.5px",
+                fontWeight: isActive ? 600 : 400,
+                textDecoration: "none",
+                transition: "background .15s, color .15s",
+                background: isActive ? "var(--vx-adim)" : "transparent",
+                color: isActive ? "var(--vx-accent)" : "var(--vx-muted)",
+                border: isActive ? "1px solid var(--vx-border)" : "1px solid transparent",
+              }}
+              onMouseEnter={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.background = "var(--vx-surface2)";
+                  e.currentTarget.style.color = "var(--vx-text)";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.background = "transparent";
+                  e.currentTarget.style.color = "var(--vx-muted)";
+                }
+              }}
+            >
+              <span style={{ fontSize: "15px" }}>{item.icon}</span>
+              {item.label}
+              {item.href === "/dashboard/admin" && (
+                <span style={{
+                  marginLeft: "auto", fontSize: "10px", padding: "2px 6px",
+                  borderRadius: "99px", background: "var(--vx-adim)",
+                  color: "var(--vx-accent)", fontWeight: 600,
+                  border: "1px solid var(--vx-border)",
+                }}>
+                  SA
+                </span>
+              )}
+            </Link>
+          );
+        })}
+      </div>
 
-      <div className="pt-3">
+      {/* Sign out */}
+      <div style={{ paddingTop: "12px", borderTop: "1px solid var(--vx-border)" }}>
         <button
           onClick={handleSignOut}
-          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-white hover:bg-gray-800 transition-colors w-full text-left"
+          style={{
+            display: "flex", alignItems: "center", gap: "10px",
+            padding: "8px 12px", borderRadius: "8px",
+            fontSize: "13.5px", color: "var(--vx-muted)",
+            background: "none", border: "none", cursor: "pointer",
+            width: "100%", textAlign: "left", transition: "background .15s",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "var(--vx-surface2)";
+            e.currentTarget.style.color = "var(--vx-text)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "none";
+            e.currentTarget.style.color = "var(--vx-muted)";
+          }}
         >
           <span>→</span> Sign out
         </button>
