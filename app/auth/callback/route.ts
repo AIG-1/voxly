@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { createServiceClient } from "@/lib/supabase-service";
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
@@ -15,9 +16,7 @@ export async function GET(request: NextRequest) {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
-          getAll() {
-            return cookieStore.getAll();
-          },
+          getAll() { return cookieStore.getAll(); },
           setAll(cookiesToSet) {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options)
@@ -27,7 +26,38 @@ export async function GET(request: NextRequest) {
       }
     );
 
-    await supabase.auth.exchangeCodeForSession(code);
+    const { data: { session } } = await supabase.auth.exchangeCodeForSession(code);
+
+    // If this was an invite flow, wire up the new user to the right company + role
+    if (session?.user) {
+      const authUser = session.user;
+      const meta = authUser.user_metadata as {
+        company_id?: string;
+        role?: string;
+        invite_id?: string;
+      };
+
+      if (meta?.company_id && meta?.role) {
+        const service = createServiceClient();
+
+        // Update their profile with the invited company + role
+        await service
+          .from("profiles")
+          .update({
+            company_id: meta.company_id,
+            role: meta.role,
+          })
+          .eq("user_id", authUser.id);
+
+        // Mark invite accepted
+        if (meta.invite_id) {
+          await service
+            .from("team_invites")
+            .update({ status: "accepted" })
+            .eq("id", meta.invite_id);
+        }
+      }
+    }
   }
 
   return NextResponse.redirect(new URL(next, request.url));
