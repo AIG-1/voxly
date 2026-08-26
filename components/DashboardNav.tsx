@@ -55,20 +55,20 @@ export default function DashboardNav({ role }: DashboardNavProps) {
                 fontWeight: isActive ? 600 : 400,
                 textDecoration: "none",
                 transition: "background .15s, color .15s",
-                background: isActive ? "var(--vx-adim)" : "transparent",
-                color: isActive ? "var(--vx-accent)" : "var(--vx-muted)",
-                border: isActive ? "1px solid var(--vx-border)" : "1px solid transparent",
+                background: isActive ? "var(--adim)" : "transparent",
+                color: isActive ? "var(--accent)" : "var(--muted)",
+                border: isActive ? "1px solid var(--border)" : "1px solid transparent",
               }}
               onMouseEnter={(e) => {
                 if (!isActive) {
-                  e.currentTarget.style.background = "var(--vx-surface2)";
-                  e.currentTarget.style.color = "var(--vx-text)";
+                  e.currentTarget.style.background = "var(--bg-alt)";
+                  e.currentTarget.style.color = "var(--ink)";
                 }
               }}
               onMouseLeave={(e) => {
                 if (!isActive) {
                   e.currentTarget.style.background = "transparent";
-                  e.currentTarget.style.color = "var(--vx-muted)";
+                  e.currentTarget.style.color = "var(--muted)";
                 }
               }}
             >
@@ -77,9 +77,9 @@ export default function DashboardNav({ role }: DashboardNavProps) {
               {item.href === "/dashboard/admin" && (
                 <span style={{
                   marginLeft: "auto", fontSize: "10px", padding: "2px 6px",
-                  borderRadius: "99px", background: "var(--vx-adim)",
-                  color: "var(--vx-accent)", fontWeight: 600,
-                  border: "1px solid var(--vx-border)",
+                  borderRadius: "99px", background: "var(--adim)",
+                  color: "var(--accent)", fontWeight: 600,
+                  border: "1px solid var(--border)",
                 }}>
                   SA
                 </span>
@@ -90,23 +90,23 @@ export default function DashboardNav({ role }: DashboardNavProps) {
       </div>
 
       {/* Sign out */}
-      <div style={{ paddingTop: "12px", borderTop: "1px solid var(--vx-border)" }}>
+      <div style={{ paddingTop: "12px", borderTop: "1px solid var(--border)" }}>
         <button
           onClick={handleSignOut}
           style={{
             display: "flex", alignItems: "center", gap: "10px",
             padding: "8px 12px", borderRadius: "8px",
-            fontSize: "13.5px", color: "var(--vx-muted)",
+            fontSize: "13.5px", color: "var(--muted)",
             background: "none", border: "none", cursor: "pointer",
             width: "100%", textAlign: "left", transition: "background .15s",
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = "var(--vx-surface2)";
-            e.currentTarget.style.color = "var(--vx-text)";
+            e.currentTarget.style.background = "var(--bg-alt)";
+            e.currentTarget.style.color = "var(--ink)";
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.background = "none";
-            e.currentTarget.style.color = "var(--vx-muted)";
+            e.currentTarget.style.color = "var(--muted)";
           }}
         >
           <span>→</span> Sign out
