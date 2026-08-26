@@ -40,14 +40,20 @@ export async function GET(request: NextRequest) {
       if (meta?.company_id && meta?.role) {
         const service = createServiceClient();
 
-        // Update their profile with the invited company + role
+        // Upsert profile — creates it if missing (invited users have no profile yet),
+        // or updates it if it already exists from a prior partial flow.
         await service
           .from("profiles")
-          .update({
-            company_id: meta.company_id,
-            role: meta.role,
-          })
-          .eq("user_id", authUser.id);
+          .upsert(
+            {
+              user_id: authUser.id,
+              email: authUser.email ?? "",
+              full_name: (authUser.user_metadata?.full_name as string) ?? "",
+              company_id: meta.company_id,
+              role: meta.role,
+            },
+            { onConflict: "user_id" }
+          );
 
         // Mark invite accepted
         if (meta.invite_id) {
