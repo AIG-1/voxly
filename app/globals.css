@@ -1,43 +1,34 @@
 @import "tailwindcss";
 
-/* ── Voxly Theme Variables ── */
+/* ── Light (default / system light) ── */
 :root {
-  /* Dark (default) */
-  --vx-bg:       #030712;
-  --vx-surface:  #111827;
-  --vx-surface2: #1a2332;
-  --vx-border:   #1f2937;
-  --vx-text:     #f9fafb;
-  --vx-muted:    #a78bfa;   /* lavender — replaces gray-400 */
-  --vx-subtle:   #7c85f5;   /* softer lavender */
-  --vx-cyan:     #22d3ee;
-  --vx-accent:   #6366f1;   /* indigo */
+  --vx-bg:       #F5F4FF;
+  --vx-surface:  #FFFFFF;
+  --vx-surface2: #EDEAFF;
+  --vx-border:   rgba(79, 70, 229, 0.12);
+  --vx-text:     #0D0B1F;
+  --vx-ink2:     #3C3860;
+  --vx-muted:    #7570A0;
+  --vx-accent:   #4F46E5;
+  --vx-cyan:     #06B6D4;
+  --vx-adim:     rgba(79, 70, 229, 0.09);
+  --vx-adim2:    rgba(6, 182, 212, 0.09);
 }
 
-[data-theme="light"] {
-  --vx-bg:       #f1f5f9;
-  --vx-surface:  #ffffff;
-  --vx-surface2: #f8fafc;
-  --vx-border:   #e2e8f0;
-  --vx-text:     #0f172a;
-  --vx-muted:    #7c3aed;   /* purple-700 */
-  --vx-subtle:   #0e7490;   /* cyan-700 */
-  --vx-cyan:     #0891b2;
-  --vx-accent:   #4f46e5;
-}
-
-/* System preference when no data-theme set */
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme]) {
-    --vx-bg:       #f1f5f9;
-    --vx-surface:  #ffffff;
-    --vx-surface2: #f8fafc;
-    --vx-border:   #e2e8f0;
-    --vx-text:     #0f172a;
-    --vx-muted:    #7c3aed;
-    --vx-subtle:   #0e7490;
-    --vx-cyan:     #0891b2;
-    --vx-accent:   #4f46e5;
+/* ── Dark (system dark) ── */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --vx-bg:       #07061A;
+    --vx-surface:  #110F28;
+    --vx-surface2: #0E0C2B;
+    --vx-border:   rgba(140, 130, 210, 0.13);
+    --vx-text:     #EDEAFF;
+    --vx-ink2:     #B2ADDA;
+    --vx-muted:    #7570A0;
+    --vx-accent:   #6366F1;
+    --vx-cyan:     #22D3EE;
+    --vx-adim:     rgba(99, 102, 241, 0.11);
+    --vx-adim2:    rgba(34, 211, 238, 0.09);
   }
 }
 
@@ -45,22 +36,23 @@ body {
   background: var(--vx-bg);
   color: var(--vx-text);
   min-height: 100vh;
-  transition: background 0.2s, color 0.2s;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* ── Voxly utility classes ── */
+a { text-decoration: none; color: inherit; }
+
+/* ── Utility classes ── */
 .vx-bg       { background: var(--vx-bg); }
 .vx-surface  { background: var(--vx-surface); }
 .vx-surface2 { background: var(--vx-surface2); }
 .vx-border   { border-color: var(--vx-border); }
 .vx-text     { color: var(--vx-text); }
 .vx-muted    { color: var(--vx-muted); }
-.vx-subtle   { color: var(--vx-subtle); }
+.vx-ink2     { color: var(--vx-ink2); }
 .vx-cyan     { color: var(--vx-cyan); }
 
-/* gradient text helper */
 .vx-gradient-text {
-  background: linear-gradient(90deg, #a78bfa, #22d3ee);
+  background: linear-gradient(90deg, var(--vx-accent), var(--vx-cyan));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
