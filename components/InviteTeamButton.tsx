@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase-browser";
 
 interface InviteTeamButtonProps {
   companyId: string;
@@ -14,29 +13,34 @@ export default function InviteTeamButton({ companyId, invitedBy }: InviteTeamBut
   const [role, setRole] = useState<"member" | "admin">("member");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
+
+  // companyId and invitedBy are passed from server but the actual invite
+  // goes through our API route which re-validates server-side
+  void companyId; void invitedBy;
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
 
-    const supabase = createClient();
-    const { error } = await supabase.from("team_invites").insert({
-      company_id: companyId,
-      invited_by: invitedBy,
-      email,
-      role,
-      status: "pending",
+    const res = await fetch("/api/invite", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email, role }),
     });
 
-    if (error) {
-      alert("Failed to send invite: " + error.message);
+    const json = await res.json();
+
+    if (!res.ok) {
+      setError(json.error ?? "Something went wrong");
     } else {
       setSuccess(true);
       setEmail("");
       setTimeout(() => {
         setOpen(false);
         setSuccess(false);
-      }, 1500);
+      }, 2500);
     }
 
     setLoading(false);
@@ -46,64 +50,103 @@ export default function InviteTeamButton({ companyId, invitedBy }: InviteTeamBut
     <>
       <button
         onClick={() => setOpen(true)}
-        className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+        style={{
+          background: "#4f46e5",
+          color: "#fff",
+          fontSize: "13px",
+          fontWeight: 500,
+          padding: "8px 16px",
+          borderRadius: "8px",
+          border: "none",
+          cursor: "pointer",
+        }}
       >
         + Invite member
       </button>
 
       {open && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-sm">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="font-semibold text-white">Invite team member</h2>
-              <button onClick={() => setOpen(false)} className="text-gray-500 hover:text-white text-lg">×</button>
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          zIndex: 50, padding: "16px",
+        }}>
+          <div style={{
+            background: "#111827", border: "1px solid #1f2937",
+            borderRadius: "16px", padding: "24px", width: "100%", maxWidth: "380px",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
+              <h2 style={{ fontWeight: 600, color: "#f9fafb", fontSize: "15px" }}>Invite team member</h2>
+              <button onClick={() => setOpen(false)} style={{ background: "none", border: "none", color: "#6b7280", cursor: "pointer", fontSize: "20px", lineHeight: 1 }}>×</button>
             </div>
 
             {success ? (
-              <div className="text-center py-4">
-                <p className="text-green-400 font-medium">✓ Invite recorded!</p>
-                <p className="text-gray-500 text-sm mt-1">Share the sign-up link with your teammate.</p>
+              <div style={{ textAlign: "center", padding: "16px 0" }}>
+                <p style={{ color: "#4ade80", fontWeight: 500, fontSize: "14px" }}>✓ Invite sent!</p>
+                <p style={{ color: "#6b7280", fontSize: "12px", marginTop: "6px" }}>
+                  {email} will receive an email with a magic link to join your workspace.
+                </p>
               </div>
             ) : (
-              <form onSubmit={handleInvite} className="space-y-4">
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1.5">Email address</label>
+              <form onSubmit={handleInvite}>
+                <div style={{ marginBottom: "16px" }}>
+                  <label style={{ display: "block", fontSize: "12px", color: "#9ca3af", marginBottom: "6px" }}>Email address</label>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     placeholder="rep@yourcompany.com"
-                    className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2.5 text-sm placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+                    style={{
+                      width: "100%", background: "#1f2937", border: "1px solid #374151",
+                      color: "#f9fafb", borderRadius: "8px", padding: "10px 14px",
+                      fontSize: "13px", outline: "none", boxSizing: "border-box",
+                    }}
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1.5">Role</label>
+                <div style={{ marginBottom: "20px" }}>
+                  <label style={{ display: "block", fontSize: "12px", color: "#9ca3af", marginBottom: "6px" }}>Role</label>
                   <select
                     value={role}
                     onChange={(e) => setRole(e.target.value as "member" | "admin")}
-                    className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500"
+                    style={{
+                      width: "100%", background: "#1f2937", border: "1px solid #374151",
+                      color: "#f9fafb", borderRadius: "8px", padding: "10px 14px",
+                      fontSize: "13px", outline: "none",
+                    }}
                   >
-                    <option value="member">Member (rep)</option>
+                    <option value="member">Member (sales rep)</option>
                     <option value="admin">Admin (manager)</option>
                   </select>
                 </div>
 
-                <div className="flex gap-3 mt-2">
+                {error && (
+                  <p style={{ color: "#f87171", fontSize: "12px", marginBottom: "12px" }}>{error}</p>
+                )}
+
+                <div style={{ display: "flex", gap: "12px" }}>
                   <button
                     type="button"
                     onClick={() => setOpen(false)}
-                    className="flex-1 border border-gray-700 text-gray-400 py-2 rounded-lg text-sm hover:text-white transition-colors"
+                    style={{
+                      flex: 1, border: "1px solid #374151", background: "none",
+                      color: "#9ca3af", padding: "10px", borderRadius: "8px",
+                      fontSize: "13px", cursor: "pointer",
+                    }}
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={loading}
-                    className="flex-1 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white py-2 rounded-lg text-sm font-medium transition-colors"
+                    style={{
+                      flex: 1, background: loading ? "#4338ca" : "#4f46e5",
+                      color: "#fff", padding: "10px", borderRadius: "8px",
+                      fontSize: "13px", fontWeight: 500, border: "none",
+                      cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.7 : 1,
+                    }}
                   >
-                    {loading ? "Inviting…" : "Send invite"}
+                    {loading ? "Sending…" : "Send invite"}
                   </button>
                 </div>
               </form>
