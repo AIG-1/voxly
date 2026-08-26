@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase-server";
 import UploadCallButton from "@/components/UploadCallButton";
+import DeleteCallButton from "@/components/DeleteCallButton";
 
 export default async function CallsPage() {
   const supabase = await createClient();
@@ -42,7 +43,7 @@ export default async function CallsPage() {
           <table className="w-full text-sm">
             <thead className="border-b border-gray-800">
               <tr>
-                {["Title", "Date", "Duration", "Status", "Score", "Outcome", "Talk %"].map((h) => (
+                {["Title", "Date", "Duration", "Status", "Score", "Outcome", "Talk %", ""].map((h) => (
                   <th
                     key={h}
                     className="text-left text-xs text-gray-500 uppercase tracking-wide px-4 py-3 font-medium"
@@ -79,6 +80,9 @@ export default async function CallsPage() {
                   </td>
                   <td className="px-4 py-3 text-gray-400">
                     {call.talk_ratio_rep ? `${Math.round(call.talk_ratio_rep)}%` : "—"}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <DeleteCallButton callId={call.id} variant="icon" />
                   </td>
                 </tr>
               ))}
