@@ -1,70 +1,70 @@
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { createClient } from "@/lib/supabase-server";
 import { createServiceClient } from "@/lib/supabase-service";
 
-export async function GET(request: NextRequest) {
-  const requestUrl = new URL(request.url);
-  const code = requestUrl.searchParams.get("code");
-  const next = requestUrl.searchParams.get("next") ?? "/dashboard";
+export async function DELETE(
+  _req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
 
-  if (code) {
-    const cookieStore = await cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() { return cookieStore.getAll(); },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            );
-          },
-        },
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("company_id, role")
+    .eq("user_id", user.id)
+    .single();
+
+  if (!profile?.company_id) {
+    return NextResponse.json({ error: "No company" }, { status: 400 });
+  }
+
+  // Fetch the call to verify ownership and get the audio URL for storage cleanup
+  const { data: call } = await supabase
+    .from("calls")
+    .select("id, company_id, audio_url, user_id")
+    .eq("id", id)
+    .single();
+
+  if (!call) {
+    return NextResponse.json({ error: "Call not found" }, { status: 404 });
+  }
+
+  // Only allow: the call's owner, or an admin/super_admin in the same company
+  const isOwner = call.user_id === user.id;
+  const isAdmin = profile.role === "admin" || profile.role === "super_admin";
+  const sameCompany = call.company_id === profile.company_id;
+
+  if (!sameCompany || (!isOwner && !isAdmin)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const service = createServiceClient();
+
+  // Delete audio from storage if present
+  if (call.audio_url) {
+    try {
+      const url = new URL(call.audio_url);
+      // Extract storage path: everything after /object/public/call-recordings/
+      const marker = "/object/public/call-recordings/";
+      const idx = url.pathname.indexOf(marker);
+      if (idx !== -1) {
+        const storagePath = decodeURIComponent(url.pathname.slice(idx + marker.length));
+        await service.storage.from("call-recordings").remove([storagePath]);
       }
-    );
-
-    const { data: { session } } = await supabase.auth.exchangeCodeForSession(code);
-
-    // If this was an invite flow, wire up the new user to the right company + role
-    if (session?.user) {
-      const authUser = session.user;
-      const meta = authUser.user_metadata as {
-        company_id?: string;
-        role?: string;
-        invite_id?: string;
-      };
-
-      if (meta?.company_id && meta?.role) {
-        const service = createServiceClient();
-
-        // Upsert profile — creates it if missing (invited users have no profile yet),
-        // or updates it if it already exists from a prior partial flow.
-        await service
-          .from("profiles")
-          .upsert(
-            {
-              user_id: authUser.id,
-              email: authUser.email ?? "",
-              full_name: (authUser.user_metadata?.full_name as string) ?? "",
-              company_id: meta.company_id,
-              role: meta.role,
-            },
-            { onConflict: "user_id" }
-          );
-
-        // Mark invite accepted
-        if (meta.invite_id) {
-          await service
-            .from("team_invites")
-            .update({ status: "accepted" })
-            .eq("id", meta.invite_id);
-        }
-      }
+    } catch {
+      // Non-fatal — proceed with DB delete even if storage cleanup fails
     }
   }
 
-  return NextResponse.redirect(new URL(next, request.url));
+  // Delete the call record
+  const { error } = await service.from("calls").delete().eq("id", id);
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ success: true });
 }
