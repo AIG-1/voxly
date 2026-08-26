@@ -23,10 +23,8 @@ export default function DeleteCallButton({ callId, variant = "icon" }: DeleteCal
 
       if (res.ok) {
         if (variant === "full") {
-          // On detail page — navigate back to list
           router.push("/dashboard/calls");
         } else {
-          // On list page — refresh data in place
           router.refresh();
         }
       } else {
@@ -45,10 +43,14 @@ export default function DeleteCallButton({ callId, variant = "icon" }: DeleteCal
   if (error) {
     return (
       <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-        <span style={{ fontSize: "12px", color: "#f87171" }}>{error}</span>
+        <span style={{ fontSize: "12px", color: "#DC2626" }}>{error}</span>
         <button
           onClick={() => setError(null)}
-          style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "6px", background: "#1f2937", color: "#9ca3af", border: "none", cursor: "pointer" }}
+          style={{
+            fontSize: "11px", padding: "2px 8px", borderRadius: "6px",
+            background: "var(--bg-alt)", color: "var(--muted)",
+            border: "1px solid var(--border)", cursor: "pointer",
+          }}
         >
           OK
         </button>
@@ -59,7 +61,7 @@ export default function DeleteCallButton({ callId, variant = "icon" }: DeleteCal
   if (confirming) {
     return (
       <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-        <span style={{ fontSize: "12px", color: "#DC2626" }}>Delete?</span>
+        <span style={{ fontSize: "12px", color: "#DC2626", fontWeight: 500 }}>Delete?</span>
         <button
           onClick={handleDelete}
           disabled={loading}
@@ -75,8 +77,8 @@ export default function DeleteCallButton({ callId, variant = "icon" }: DeleteCal
           onClick={() => setConfirming(false)}
           style={{
             fontSize: "11px", padding: "3px 10px", borderRadius: "6px",
-            background: "var(--vx-surface2, #EDEAFF)", color: "var(--vx-muted, #7570A0)",
-            border: "1px solid var(--vx-border, rgba(79,70,229,.12))", cursor: "pointer",
+            background: "var(--bg-alt)", color: "var(--muted)",
+            border: "1px solid var(--border)", cursor: "pointer",
           }}
         >
           Cancel
@@ -92,11 +94,11 @@ export default function DeleteCallButton({ callId, variant = "icon" }: DeleteCal
         style={{
           fontSize: "13px", padding: "8px 16px", borderRadius: "8px",
           background: "none", color: "#DC2626",
-          border: "1px solid rgba(220,38,38,.3)", cursor: "pointer",
+          border: "1px solid rgba(220,38,38,.25)", cursor: "pointer",
           transition: "all .15s",
         }}
-        onMouseEnter={(e) => { e.currentTarget.style.background = "#FEE2E2"; }}
-        onMouseLeave={(e) => { e.currentTarget.style.background = "none"; }}
+        onMouseEnter={(e) => { e.currentTarget.style.background = "#FEF2F2"; e.currentTarget.style.borderColor = "rgba(220,38,38,.5)"; }}
+        onMouseLeave={(e) => { e.currentTarget.style.background = "none"; e.currentTarget.style.borderColor = "rgba(220,38,38,.25)"; }}
       >
         Delete call
       </button>
@@ -109,12 +111,12 @@ export default function DeleteCallButton({ callId, variant = "icon" }: DeleteCal
       title="Delete call"
       style={{
         background: "none", border: "none",
-        color: "var(--vx-muted, #7570A0)",
-        cursor: "pointer", fontSize: "16px", padding: "2px 6px",
+        color: "var(--muted)",
+        cursor: "pointer", fontSize: "18px", padding: "2px 6px",
         lineHeight: 1, borderRadius: "4px", transition: "color .15s",
       }}
       onMouseEnter={(e) => (e.currentTarget.style.color = "#DC2626")}
-      onMouseLeave={(e) => (e.currentTarget.style.color = "var(--vx-muted, #7570A0)")}
+      onMouseLeave={(e) => (e.currentTarget.style.color = "var(--muted)")}
     >
       ×
     </button>
