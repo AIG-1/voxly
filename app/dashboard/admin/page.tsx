@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase-server";
+import { createServiceClient } from "@/lib/supabase-service";
 
 export default async function AdminPage() {
   const supabase = await createClient();
@@ -13,14 +14,19 @@ export default async function AdminPage() {
 
   if (profile?.role !== "super_admin") redirect("/dashboard");
 
+  // Use service client so we can read all companies/users/calls without RLS
+  const service = createServiceClient();
+
   const [
     { data: companies },
     { data: allProfiles },
     { data: allCalls },
+    { data: allInvites },
   ] = await Promise.all([
-    supabase.from("companies").select("id, name, industry, team_size, created_at").order("created_at", { ascending: false }),
-    supabase.from("profiles").select("id, full_name, email, role, company_id, created_at").order("created_at", { ascending: false }),
-    supabase.from("calls").select("id, title, status, coaching_score, outcome, company_id, created_at").order("created_at", { ascending: false }),
+    service.from("companies").select("id, name, industry, team_size, created_at").order("created_at", { ascending: false }),
+    service.from("profiles").select("id, full_name, email, role, company_id, created_at").order("created_at", { ascending: false }),
+    service.from("calls").select("id, title, status, coaching_score, outcome, company_id, user_id, created_at").order("created_at", { ascending: false }),
+    service.from("team_invites").select("id, email, role, company_id, status, created_at").order("created_at", { ascending: false }),
   ]);
 
   const totalCompanies  = companies?.length ?? 0;
@@ -32,21 +38,43 @@ export default async function AdminPage() {
     : null;
   const wonCalls        = completedCalls.filter((c) => c.outcome === "won").length;
   const winRate         = completedCalls.length > 0 ? Math.round((wonCalls / completedCalls.length) * 100) : null;
+  const pendingInvites  = allInvites?.filter((i) => i.status === "pending").length ?? 0;
 
   const companyMap: Record<string, string> = {};
   companies?.forEach((c) => { companyMap[c.id] = c.name; });
 
-  const card = {
-    background: "#111827",
-    border: "1px solid #1f2937",
+  // Helper styles using CSS vars
+  const surface: React.CSSProperties = {
+    background: "var(--vx-surface)",
+    border: "1px solid var(--vx-border)",
     borderRadius: "12px",
-    padding: "20px",
-  } as const;
+    overflow: "hidden",
+  };
 
-  const muted = "#a78bfa";
-  const subtle = "#7c85f5";
-  const cyan = "#22d3ee";
-  const white = "#f9fafb";
+  const sectionHeader: React.CSSProperties = {
+    padding: "16px 20px",
+    borderBottom: "1px solid var(--vx-border)",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  };
+
+  const th: React.CSSProperties = {
+    padding: "10px 16px",
+    textAlign: "left",
+    fontSize: "11px",
+    textTransform: "uppercase",
+    letterSpacing: "0.06em",
+    color: "var(--vx-muted)",
+    fontWeight: 600,
+    borderBottom: "1px solid var(--vx-border)",
+    background: "var(--vx-surface2)",
+  };
+
+  const td: React.CSSProperties = {
+    padding: "12px 16px",
+    borderBottom: "1px solid var(--vx-border)",
+  };
 
   return (
     <div>
@@ -54,61 +82,63 @@ export default async function AdminPage() {
       <div style={{ marginBottom: "32px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "4px" }}>
           <span style={{ fontSize: "28px" }}>🛡</span>
-          <h1 style={{ fontSize: "24px", fontWeight: 700, color: white }}>Super Admin</h1>
+          <h1 style={{ fontSize: "24px", fontWeight: 700, color: "var(--vx-text)" }}>Super Admin</h1>
         </div>
-        <p style={{ fontSize: "14px", color: muted, marginLeft: "40px" }}>
+        <p style={{ fontSize: "14px", color: "var(--vx-muted)", marginLeft: "40px" }}>
           Platform-wide view — {totalCompanies} {totalCompanies === 1 ? "company" : "companies"}, {totalUsers} {totalUsers === 1 ? "user" : "users"}, {totalCalls} {totalCalls === 1 ? "call" : "calls"}
         </p>
       </div>
 
       {/* KPI row */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px", marginBottom: "32px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "14px", marginBottom: "28px" }}>
         {[
-          { icon: "🏢", label: "Companies",      value: totalCompanies.toString(),                    sub: "tenants on platform" },
-          { icon: "👤", label: "Total Users",     value: totalUsers.toString(),                       sub: "across all companies" },
-          { icon: "🎙", label: "Total Calls",     value: totalCalls.toString(),                       sub: `${completedCalls.length} analyzed` },
-          { icon: "📊", label: "Avg Coach Score", value: avgScore !== null ? `${avgScore}/100` : "—", sub: winRate !== null ? `${winRate}% win rate` : "no data yet" },
+          { icon: "🏢", label: "Companies",     value: totalCompanies.toString(),                      sub: "tenants on platform" },
+          { icon: "👤", label: "Users",          value: totalUsers.toString(),                          sub: "across all companies" },
+          { icon: "🎙", label: "Calls",          value: totalCalls.toString(),                          sub: `${completedCalls.length} analyzed` },
+          { icon: "📊", label: "Avg Score",      value: avgScore !== null ? `${avgScore}/100` : "—",    sub: winRate !== null ? `${winRate}% win rate` : "—" },
+          { icon: "✉️", label: "Pending Invites", value: pendingInvites.toString(),                      sub: "awaiting acceptance" },
         ].map((s) => (
-          <div key={s.label} style={{ ...card }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
-              <span style={{ fontSize: "18px" }}>{s.icon}</span>
-              <p style={{ fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.06em", color: muted, fontWeight: 500 }}>{s.label}</p>
+          <div key={s.label} style={{ background: "var(--vx-surface)", border: "1px solid var(--vx-border)", borderRadius: "12px", padding: "18px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "7px", marginBottom: "10px" }}>
+              <span style={{ fontSize: "16px" }}>{s.icon}</span>
+              <p style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.07em", color: "var(--vx-muted)", fontWeight: 600 }}>{s.label}</p>
             </div>
-            <p style={{ fontSize: "32px", fontWeight: 700, color: white, lineHeight: 1 }}>{s.value}</p>
-            <p style={{ fontSize: "12px", color: subtle, marginTop: "6px" }}>{s.sub}</p>
+            <p style={{ fontSize: "28px", fontWeight: 700, color: "var(--vx-text)", lineHeight: 1 }}>{s.value}</p>
+            <p style={{ fontSize: "11px", color: "var(--vx-muted)", marginTop: "5px" }}>{s.sub}</p>
           </div>
         ))}
       </div>
 
-      {/* Two-column: companies + users */}
+      {/* Companies + Users side by side */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
 
         {/* Companies */}
-        <div style={{ background: "#111827", border: "1px solid #1f2937", borderRadius: "12px", overflow: "hidden" }}>
-          <div style={{ padding: "16px 20px", borderBottom: "1px solid #1f2937", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <h2 style={{ fontWeight: 600, color: white, fontSize: "14px" }}>Companies</h2>
-            <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "99px", background: "#312e81", color: "#a5b4fc" }}>{totalCompanies}</span>
+        <div style={surface}>
+          <div style={sectionHeader}>
+            <h2 style={{ fontWeight: 600, color: "var(--vx-text)", fontSize: "14px" }}>Companies</h2>
+            <CountPill count={totalCompanies} />
           </div>
           {!companies || companies.length === 0 ? (
-            <div style={{ padding: "40px", textAlign: "center" }}>
-              <p style={{ fontSize: "32px" }}>🏢</p>
-              <p style={{ color: muted, fontSize: "13px", marginTop: "8px" }}>No companies yet</p>
-            </div>
+            <EmptyState icon="🏢" text="No companies yet" />
           ) : (
             companies.map((c, i) => {
               const memberCount = allProfiles?.filter((p) => p.company_id === c.id).length ?? 0;
               const callCount   = allCalls?.filter((call) => call.company_id === c.id).length ?? 0;
               return (
-                <div key={c.id} style={{ padding: "14px 20px", borderBottom: i < companies.length - 1 ? "1px solid #1f2937" : "none", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div key={c.id} style={{
+                  padding: "14px 20px",
+                  borderBottom: i < companies.length - 1 ? "1px solid var(--vx-border)" : "none",
+                  display: "flex", justifyContent: "space-between", alignItems: "center",
+                }}>
                   <div>
-                    <p style={{ fontSize: "13px", fontWeight: 500, color: white }}>{c.name}</p>
-                    <p style={{ fontSize: "11px", color: subtle, marginTop: "2px" }}>
+                    <p style={{ fontSize: "13px", fontWeight: 600, color: "var(--vx-text)" }}>{c.name}</p>
+                    <p style={{ fontSize: "11px", color: "var(--vx-muted)", marginTop: "2px" }}>
                       {c.industry ?? "No industry"} · {memberCount} member{memberCount !== 1 ? "s" : ""} · since {new Date(c.created_at).toLocaleDateString()}
                     </p>
                   </div>
                   <div style={{ textAlign: "right" }}>
-                    <p style={{ fontSize: "18px", fontWeight: 700, color: cyan }}>{callCount}</p>
-                    <p style={{ fontSize: "11px", color: subtle }}>calls</p>
+                    <p style={{ fontSize: "20px", fontWeight: 700, color: "var(--vx-accent)" }}>{callCount}</p>
+                    <p style={{ fontSize: "11px", color: "var(--vx-muted)" }}>calls</p>
                   </div>
                 </div>
               );
@@ -117,26 +147,34 @@ export default async function AdminPage() {
         </div>
 
         {/* Users */}
-        <div style={{ background: "#111827", border: "1px solid #1f2937", borderRadius: "12px", overflow: "hidden" }}>
-          <div style={{ padding: "16px 20px", borderBottom: "1px solid #1f2937", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <h2 style={{ fontWeight: 600, color: white, fontSize: "14px" }}>All Users</h2>
-            <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "99px", background: "#312e81", color: "#a5b4fc" }}>{totalUsers}</span>
+        <div style={surface}>
+          <div style={sectionHeader}>
+            <h2 style={{ fontWeight: 600, color: "var(--vx-text)", fontSize: "14px" }}>All Users</h2>
+            <CountPill count={totalUsers} />
           </div>
           {!allProfiles || allProfiles.length === 0 ? (
-            <div style={{ padding: "40px", textAlign: "center" }}>
-              <p style={{ fontSize: "32px" }}>👤</p>
-              <p style={{ color: muted, fontSize: "13px", marginTop: "8px" }}>No users yet</p>
-            </div>
+            <EmptyState icon="👤" text="No users yet" />
           ) : (
-            allProfiles.slice(0, 8).map((p, i) => (
-              <div key={p.id} style={{ padding: "12px 20px", borderBottom: i < Math.min(allProfiles.length, 8) - 1 ? "1px solid #1f2937" : "none", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            allProfiles.slice(0, 10).map((p, i) => (
+              <div key={p.id} style={{
+                padding: "12px 20px",
+                borderBottom: i < Math.min(allProfiles.length, 10) - 1 ? "1px solid var(--vx-border)" : "none",
+                display: "flex", justifyContent: "space-between", alignItems: "center",
+              }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <div style={{ width: "30px", height: "30px", borderRadius: "50%", background: "#4338ca", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: 600, color: "#fff", flexShrink: 0 }}>
+                  <div style={{
+                    width: "30px", height: "30px", borderRadius: "50%",
+                    background: "var(--vx-adim)", border: "1px solid var(--vx-border)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: "12px", fontWeight: 700, color: "var(--vx-accent)", flexShrink: 0,
+                  }}>
                     {(p.full_name || p.email || "?")[0].toUpperCase()}
                   </div>
                   <div>
-                    <p style={{ fontSize: "13px", fontWeight: 500, color: white }}>{p.full_name || "—"}</p>
-                    <p style={{ fontSize: "11px", color: subtle }}>{p.email} · {companyMap[p.company_id] ?? "Unknown"}</p>
+                    <p style={{ fontSize: "13px", fontWeight: 500, color: "var(--vx-text)" }}>{p.full_name || "—"}</p>
+                    <p style={{ fontSize: "11px", color: "var(--vx-muted)" }}>
+                      {p.email} · {companyMap[p.company_id] ?? "Unknown co."}
+                    </p>
                   </div>
                 </div>
                 <RoleBadge role={p.role} />
@@ -146,91 +184,162 @@ export default async function AdminPage() {
         </div>
       </div>
 
-      {/* All Calls */}
-      <div style={{ background: "#111827", border: "1px solid #1f2937", borderRadius: "12px", overflow: "hidden" }}>
-        <div style={{ padding: "16px 20px", borderBottom: "1px solid #1f2937", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h2 style={{ fontWeight: 600, color: white, fontSize: "14px" }}>All Calls — Platform-wide</h2>
-          <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "99px", background: "#312e81", color: "#a5b4fc" }}>{totalCalls} total</span>
-        </div>
-        {!allCalls || allCalls.length === 0 ? (
-          <div style={{ padding: "48px", textAlign: "center" }}>
-            <p style={{ fontSize: "40px" }}>🎙</p>
-            <p style={{ color: muted, fontSize: "14px", marginTop: "12px" }}>No calls uploaded on the platform yet</p>
+      {/* Pending Invites */}
+      {allInvites && allInvites.filter(i => i.status === "pending").length > 0 && (
+        <div style={{ ...surface, marginBottom: "20px" }}>
+          <div style={sectionHeader}>
+            <h2 style={{ fontWeight: 600, color: "var(--vx-text)", fontSize: "14px" }}>Pending Invites</h2>
+            <CountPill count={pendingInvites} />
           </div>
-        ) : (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ borderBottom: "1px solid #1f2937" }}>
-                {["Call", "Company", "Date", "Status", "Score", "Outcome"].map((h) => (
-                  <th key={h} style={{ padding: "10px 16px", textAlign: "left", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.06em", color: muted, fontWeight: 500 }}>
-                    {h}
-                  </th>
+              <tr>
+                {["Email", "Company", "Role", "Sent"].map((h) => (
+                  <th key={h} style={th}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {allCalls.slice(0, 20).map((call, i) => (
-                <tr key={call.id} style={{ borderBottom: i < Math.min(allCalls.length, 20) - 1 ? "1px solid #1f2937" : "none" }}>
-                  <td style={{ padding: "12px 16px" }}>
-                    <a href={`/dashboard/calls/${call.id}`} style={{ fontSize: "13px", fontWeight: 500, color: white, textDecoration: "none" }}>
-                      {call.title || `Call #${call.id.slice(-6)}`}
-                    </a>
-                  </td>
-                  <td style={{ padding: "12px 16px", fontSize: "12px", color: muted }}>{companyMap[call.company_id] ?? "—"}</td>
-                  <td style={{ padding: "12px 16px", fontSize: "12px", color: subtle }}>{new Date(call.created_at).toLocaleDateString()}</td>
-                  <td style={{ padding: "12px 16px" }}><StatusBadge status={call.status} /></td>
-                  <td style={{ padding: "12px 16px", fontSize: "13px", fontWeight: 600, color: cyan }}>{call.coaching_score ? `${call.coaching_score}/100` : "—"}</td>
-                  <td style={{ padding: "12px 16px" }}>{call.outcome ? <OutcomeBadge outcome={call.outcome} /> : <span style={{ color: subtle }}>—</span>}</td>
+              {allInvites.filter(i => i.status === "pending").map((inv, i) => (
+                <tr key={inv.id}>
+                  <td style={{ ...td, fontSize: "13px", color: "var(--vx-text)", fontWeight: 500 }}>{inv.email}</td>
+                  <td style={{ ...td, fontSize: "12px", color: "var(--vx-muted)" }}>{companyMap[inv.company_id] ?? "—"}</td>
+                  <td style={td}><RoleBadge role={inv.role} /></td>
+                  <td style={{ ...td, fontSize: "12px", color: "var(--vx-muted)" }}>{new Date(inv.created_at).toLocaleDateString()}</td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* All Calls */}
+      <div style={surface}>
+        <div style={sectionHeader}>
+          <h2 style={{ fontWeight: 600, color: "var(--vx-text)", fontSize: "14px" }}>All Calls — Platform-wide</h2>
+          <CountPill count={totalCalls} label="total" />
+        </div>
+        {!allCalls || allCalls.length === 0 ? (
+          <EmptyState icon="🎙" text="No calls uploaded yet" />
+        ) : (
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr>
+                  {["Call", "Company", "Date", "Status", "Score", "Outcome"].map((h) => (
+                    <th key={h} style={th}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {allCalls.slice(0, 25).map((call, i) => (
+                  <tr key={call.id} style={{ background: i % 2 === 0 ? "transparent" : "var(--vx-surface2)" }}>
+                    <td style={{ ...td, borderBottom: i < Math.min(allCalls.length, 25) - 1 ? "1px solid var(--vx-border)" : "none" }}>
+                      <a href={`/dashboard/calls/${call.id}`} style={{ fontSize: "13px", fontWeight: 500, color: "var(--vx-accent)" }}>
+                        {call.title || `Call #${call.id.slice(-6)}`}
+                      </a>
+                    </td>
+                    <td style={{ ...td, fontSize: "12px", color: "var(--vx-muted)", borderBottom: i < Math.min(allCalls.length, 25) - 1 ? "1px solid var(--vx-border)" : "none" }}>
+                      {companyMap[call.company_id] ?? "—"}
+                    </td>
+                    <td style={{ ...td, fontSize: "12px", color: "var(--vx-muted)", borderBottom: i < Math.min(allCalls.length, 25) - 1 ? "1px solid var(--vx-border)" : "none" }}>
+                      {new Date(call.created_at).toLocaleDateString()}
+                    </td>
+                    <td style={{ ...td, borderBottom: i < Math.min(allCalls.length, 25) - 1 ? "1px solid var(--vx-border)" : "none" }}>
+                      <StatusBadge status={call.status} />
+                    </td>
+                    <td style={{ ...td, fontSize: "13px", fontWeight: 700, color: "var(--vx-accent)", borderBottom: i < Math.min(allCalls.length, 25) - 1 ? "1px solid var(--vx-border)" : "none" }}>
+                      {call.coaching_score ? `${call.coaching_score}/100` : "—"}
+                    </td>
+                    <td style={{ ...td, borderBottom: i < Math.min(allCalls.length, 25) - 1 ? "1px solid var(--vx-border)" : "none" }}>
+                      {call.outcome ? <OutcomeBadge outcome={call.outcome} /> : <span style={{ color: "var(--vx-muted)" }}>—</span>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>
   );
 }
 
+/* ── Sub-components ── */
+
+function CountPill({ count, label = "" }: { count: number; label?: string }) {
+  return (
+    <span style={{
+      fontSize: "11px", padding: "2px 10px", borderRadius: "99px",
+      background: "var(--vx-adim)", color: "var(--vx-accent)",
+      border: "1px solid var(--vx-border)", fontWeight: 600,
+    }}>
+      {count}{label ? ` ${label}` : ""}
+    </span>
+  );
+}
+
+function EmptyState({ icon, text }: { icon: string; text: string }) {
+  return (
+    <div style={{ padding: "40px", textAlign: "center" }}>
+      <p style={{ fontSize: "32px" }}>{icon}</p>
+      <p style={{ color: "var(--vx-muted)", fontSize: "13px", marginTop: "8px" }}>{text}</p>
+    </div>
+  );
+}
+
 function RoleBadge({ role }: { role: string }) {
-  const styles: Record<string, { bg: string; color: string }> = {
-    super_admin: { bg: "#581c87", color: "#d8b4fe" },
-    admin:       { bg: "#312e81", color: "#a5b4fc" },
-    member:      { bg: "#1f2937", color: "#9ca3af" },
+  const styles: Record<string, { bg: string; color: string; border: string }> = {
+    super_admin: { bg: "rgba(79,70,229,.12)", color: "#4338CA", border: "rgba(79,70,229,.25)" },
+    admin:       { bg: "rgba(6,182,212,.10)", color: "#0E7490", border: "rgba(6,182,212,.25)" },
+    member:      { bg: "rgba(117,112,160,.10)", color: "#7570A0", border: "rgba(117,112,160,.25)" },
   };
   const s = styles[role] ?? styles.member;
   return (
-    <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "99px", background: s.bg, color: s.color, fontWeight: 500, textTransform: "capitalize" }}>
+    <span style={{
+      fontSize: "11px", padding: "2px 9px", borderRadius: "99px",
+      background: s.bg, color: s.color, border: `1px solid ${s.border}`,
+      fontWeight: 600, textTransform: "capitalize",
+    }}>
       {role.replace("_", " ")}
     </span>
   );
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const styles: Record<string, { bg: string; color: string }> = {
-    pending:      { bg: "#1f2937", color: "#9ca3af" },
-    transcribing: { bg: "#422006", color: "#fcd34d" },
-    analyzing:    { bg: "#1e3a5f", color: "#93c5fd" },
-    completed:    { bg: "#052e16", color: "#86efac" },
-    error:        { bg: "#450a0a", color: "#fca5a5" },
+  const styles: Record<string, { bg: string; color: string; border: string }> = {
+    pending:      { bg: "#F3F4F6", color: "#6B7280", border: "#D1D5DB" },
+    transcribing: { bg: "#FEF9C3", color: "#92400E", border: "#FDE68A" },
+    analyzing:    { bg: "#DBEAFE", color: "#1E40AF", border: "#BFDBFE" },
+    completed:    { bg: "#DCFCE7", color: "#166534", border: "#BBF7D0" },
+    error:        { bg: "#FEE2E2", color: "#991B1B", border: "#FECACA" },
   };
   const s = styles[status] ?? styles.pending;
   return (
-    <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "99px", background: s.bg, color: s.color, fontWeight: 500 }}>
+    <span style={{
+      fontSize: "11px", padding: "2px 9px", borderRadius: "99px",
+      background: s.bg, color: s.color, border: `1px solid ${s.border}`,
+      fontWeight: 600,
+    }}>
       {status}
     </span>
   );
 }
 
 function OutcomeBadge({ outcome }: { outcome: string }) {
-  const styles: Record<string, { bg: string; color: string }> = {
-    won:       { bg: "#052e16", color: "#86efac" },
-    lost:      { bg: "#450a0a", color: "#fca5a5" },
-    follow_up: { bg: "#422006", color: "#fcd34d" },
-    unknown:   { bg: "#1f2937", color: "#9ca3af" },
+  const styles: Record<string, { bg: string; color: string; border: string }> = {
+    won:       { bg: "#DCFCE7", color: "#166534", border: "#BBF7D0" },
+    lost:      { bg: "#FEE2E2", color: "#991B1B", border: "#FECACA" },
+    follow_up: { bg: "#FEF9C3", color: "#92400E", border: "#FDE68A" },
+    unknown:   { bg: "#F3F4F6", color: "#6B7280", border: "#D1D5DB" },
   };
   const s = styles[outcome] ?? styles.unknown;
   return (
-    <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "99px", background: s.bg, color: s.color, fontWeight: 500, textTransform: "capitalize" }}>
+    <span style={{
+      fontSize: "11px", padding: "2px 9px", borderRadius: "99px",
+      background: s.bg, color: s.color, border: `1px solid ${s.border}`,
+      fontWeight: 600, textTransform: "capitalize",
+    }}>
       {outcome.replace("_", " ")}
     </span>
   );
