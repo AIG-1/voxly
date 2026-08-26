@@ -46,7 +46,8 @@ export default async function CallsPage() {
           background: "var(--surface)", border: "1px solid var(--border)",
           borderRadius: "var(--radius)", overflow: "hidden",
         }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+          <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px", minWidth: "720px" }}>
             <thead>
               <tr style={{ borderBottom: "1px solid var(--border)", background: "var(--bg-alt)" }}>
                 {["Title", "Date", "Duration", "Status", "Score", "Outcome", "Talk %", ""].map((h) => (
@@ -105,6 +106,7 @@ export default async function CallsPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>
