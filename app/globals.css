@@ -1,58 +1,36 @@
 @import "tailwindcss";
 
-/* ── Light (default / system light) ── */
+/* ── Voxly design tokens — light only ── */
 :root {
-  --vx-bg:       #F5F4FF;
-  --vx-surface:  #FFFFFF;
-  --vx-surface2: #EDEAFF;
-  --vx-border:   rgba(79, 70, 229, 0.12);
-  --vx-text:     #0D0B1F;
-  --vx-ink2:     #3C3860;
-  --vx-muted:    #7570A0;
-  --vx-accent:   #4F46E5;
-  --vx-cyan:     #06B6D4;
-  --vx-adim:     rgba(79, 70, 229, 0.09);
-  --vx-adim2:    rgba(6, 182, 212, 0.09);
-}
-
-/* ── Dark (system dark) ── */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --vx-bg:       #07061A;
-    --vx-surface:  #110F28;
-    --vx-surface2: #0E0C2B;
-    --vx-border:   rgba(140, 130, 210, 0.13);
-    --vx-text:     #EDEAFF;
-    --vx-ink2:     #B2ADDA;
-    --vx-muted:    #7570A0;
-    --vx-accent:   #6366F1;
-    --vx-cyan:     #22D3EE;
-    --vx-adim:     rgba(99, 102, 241, 0.11);
-    --vx-adim2:    rgba(34, 211, 238, 0.09);
-  }
+  --bg:       #F5F4FF;
+  --bg-alt:   #EDEAFF;
+  --surface:  #FFFFFF;
+  --ink:      #0D0B1F;
+  --ink-2:    #3C3860;
+  --muted:    #7570A0;
+  --border:   rgba(79, 70, 229, 0.10);
+  --accent:   #4F46E5;
+  --accent-2: #06B6D4;
+  --adim:     rgba(79, 70, 229, 0.09);
+  --adim-2:   rgba(6, 182, 212, 0.09);
+  --radius:   12px;
 }
 
 body {
-  background: var(--vx-bg);
-  color: var(--vx-text);
+  background: var(--bg);
+  color: var(--ink);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
 }
 
 a { text-decoration: none; color: inherit; }
 
-/* ── Utility classes ── */
-.vx-bg       { background: var(--vx-bg); }
-.vx-surface  { background: var(--vx-surface); }
-.vx-surface2 { background: var(--vx-surface2); }
-.vx-border   { border-color: var(--vx-border); }
-.vx-text     { color: var(--vx-text); }
-.vx-muted    { color: var(--vx-muted); }
-.vx-ink2     { color: var(--vx-ink2); }
-.vx-cyan     { color: var(--vx-cyan); }
+/* ── Dashboard utilities ── */
+.vx-tr-hover { cursor: pointer; transition: background 0.15s; }
+.vx-tr-hover:hover { background: var(--bg-alt); }
 
 .vx-gradient-text {
-  background: linear-gradient(90deg, var(--vx-accent), var(--vx-cyan));
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
