@@ -4,7 +4,7 @@ import { useState } from "react";
 
 interface CollapsibleSectionProps {
   title: string;
-  preview?: string; // short text shown when collapsed
+  preview?: string;
   children: React.ReactNode;
   defaultOpen?: boolean;
 }
@@ -20,9 +20,9 @@ export default function CollapsibleSection({
   return (
     <div
       style={{
-        background: "#111827",
-        border: "1px solid #1f2937",
-        borderRadius: "12px",
+        background: "var(--surface)",
+        border: "1px solid var(--border)",
+        borderRadius: "var(--radius)",
         marginBottom: "16px",
         overflow: "hidden",
       }}
@@ -43,14 +43,14 @@ export default function CollapsibleSection({
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0 }}>
-          <span style={{ fontSize: "13px", fontWeight: 600, color: "#f9fafb", flexShrink: 0 }}>
+          <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--ink)", flexShrink: 0 }}>
             {title}
           </span>
           {!open && preview && (
             <span
               style={{
                 fontSize: "12px",
-                color: "#6b7280",
+                color: "var(--muted)",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
@@ -63,7 +63,7 @@ export default function CollapsibleSection({
         <span
           style={{
             fontSize: "12px",
-            color: "#6b7280",
+            color: "var(--muted)",
             flexShrink: 0,
             transform: open ? "rotate(180deg)" : "rotate(0deg)",
             transition: "transform 0.2s",
@@ -75,7 +75,7 @@ export default function CollapsibleSection({
       </button>
 
       {open && (
-        <div style={{ padding: "0 20px 16px 20px", borderTop: "1px solid #1f2937" }}>
+        <div style={{ padding: "0 20px 16px 20px", borderTop: "1px solid var(--border)" }}>
           <div style={{ paddingTop: "14px" }}>{children}</div>
         </div>
       )}
