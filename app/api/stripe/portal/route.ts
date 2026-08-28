@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase-server";
 import { createServiceClient } from "@/lib/supabase-service";
-import stripe from "@/lib/stripe";
+import {stripe} from "@/lib/stripe";
 
 export async function POST(req: Request) {
   const supabase = await createClient();
@@ -31,7 +31,7 @@ export async function POST(req: Request) {
 
   const origin = req.headers.get("origin") ?? process.env.NEXT_PUBLIC_APP_URL ?? "https://voxly.app";
 
-  const session = await stripe.billingPortal.sessions.create({
+  const session = await stripe().billingPortal.sessions.create({
     customer: company.stripe_customer_id,
     return_url: `${origin}/dashboard/billing`,
   });
