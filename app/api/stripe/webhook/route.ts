@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import stripe from "@/lib/stripe";
+import {stripe} from "@/lib/stripe";
 import { createServiceClient } from "@/lib/supabase-service";
 import type Stripe from "stripe";
 
@@ -14,7 +14,7 @@ export async function POST(req: Request) {
 
   let event: Stripe.Event;
   try {
-    event = stripe.webhooks.constructEvent(body, sig, secret);
+    event = stripe().webhooks.constructEvent(body, sig, secret);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Webhook verification failed";
     return NextResponse.json({ error: message }, { status: 400 });
