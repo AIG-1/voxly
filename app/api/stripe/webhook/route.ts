@@ -3,9 +3,6 @@ import stripe from "@/lib/stripe";
 import { createServiceClient } from "@/lib/supabase-service";
 import type Stripe from "stripe";
 
-// Netlify / Next.js: disable body parsing so we get the raw buffer for signature verification
-export const config = { api: { bodyParser: false } };
-
 export async function POST(req: Request) {
   const body = await req.text();
   const sig = req.headers.get("stripe-signature");
