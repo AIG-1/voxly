@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase-server";
 import { createServiceClient } from "@/lib/supabase-service";
-import stripe from "@/lib/stripe";
+import { stripe } from "@/lib/stripe";
 
 export async function POST(req: Request) {
   const supabase = await createClient();
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Already subscribed" }, { status: 400 });
   }
 
-  const priceId = process.env.STRIPE_PRICE_ID_MONTHLY;
+  const priceId = process.env.STRIPE_PRICE_ID;
   if (!priceId) return NextResponse.json({ error: "Price not configured" }, { status: 500 });
 
   const origin = req.headers.get("origin") ?? process.env.NEXT_PUBLIC_APP_URL ?? "https://voxly.app";
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
   // Create or reuse Stripe customer
   let customerId = company.stripe_customer_id;
   if (!customerId) {
-    const customer = await stripe.customers.create({
+    const customer = await stripe().customers.create({
       email: user.email,
       name: company.name,
       metadata: { company_id: company.id },
@@ -53,7 +53,7 @@ export async function POST(req: Request) {
       .eq("id", company.id);
   }
 
-  const session = await stripe.checkout.sessions.create({
+  const session = await stripe.checkout().sessions.create({
     customer: customerId,
     mode: "subscription",
     payment_method_types: ["card"],
