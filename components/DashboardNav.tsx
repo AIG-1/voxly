@@ -16,10 +16,11 @@ export default function DashboardNav({ role }: DashboardNavProps) {
   const isSuperAdmin = role === "super_admin";
 
   const navItems = [
-    { href: "/dashboard",          label: "Overview", icon: "◈" },
-    { href: "/dashboard/calls",    label: "Calls",    icon: "🎙" },
-    { href: "/dashboard/team",     label: "Team",     icon: "👥" },
-    { href: "/dashboard/settings", label: "Settings", icon: "⚙" },
+    { href: "/dashboard",           label: "Overview", icon: "◈" },
+    { href: "/dashboard/calls",     label: "Calls",    icon: "🎙" },
+    { href: "/dashboard/team",      label: "Team",     icon: "👥" },
+    { href: "/dashboard/billing",   label: "Billing",  icon: "💳" },
+    { href: "/dashboard/settings",  label: "Settings", icon: "⚙" },
     ...(isSuperAdmin
       ? [{ href: "/dashboard/admin", label: "Admin", icon: "🛡" }]
       : []),
