@@ -63,44 +63,75 @@ export default function OnboardingPage() {
     router.refresh();
   };
 
+  const inputStyle: React.CSSProperties = {
+    width: "100%", background: "var(--surface)",
+    border: "1px solid var(--border)", color: "var(--ink)",
+    borderRadius: "8px", padding: "10px 14px", fontSize: "14px",
+    outline: "none", transition: "border-color .15s", boxSizing: "border-box",
+  };
+
+  const labelStyle: React.CSSProperties = {
+    display: "block", fontSize: "13px", color: "var(--muted)",
+    marginBottom: "6px", fontWeight: 500,
+  };
+
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <div className="flex justify-center mb-8">
+    <div style={{
+      minHeight: "100vh", background: "var(--bg)",
+      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+      padding: "24px",
+    }}>
+      <div style={{ width: "100%", maxWidth: "440px" }}>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: "32px" }}>
           <VoxlyLogo size={44} />
         </div>
 
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8">
-          <div className="mb-6">
-            <h1 className="text-xl font-semibold text-white mb-1">Set up your workspace</h1>
-            <p className="text-gray-400 text-sm">Tell us about your company to get started.</p>
+        <div style={{
+          background: "var(--surface)", border: "1px solid var(--border)",
+          borderRadius: "var(--radius)", padding: "32px",
+        }}>
+          <div style={{ marginBottom: "24px" }}>
+            <h1 style={{ fontSize: "20px", fontWeight: 700, color: "var(--ink)", marginBottom: "6px" }}>
+              Set up your workspace
+            </h1>
+            <p style={{ fontSize: "13px", color: "var(--muted)" }}>
+              Tell us about your company to get started.
+            </p>
           </div>
 
           {error && (
-            <div className="bg-red-950 border border-red-800 text-red-300 text-sm px-4 py-3 rounded-lg mb-5">
+            <div style={{
+              background: "#FEE2E2", border: "1px solid #FECACA",
+              color: "#991B1B", fontSize: "13px", padding: "12px 16px",
+              borderRadius: "8px", marginBottom: "20px",
+            }}>
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             <div>
-              <label className="block text-sm text-gray-400 mb-1.5">Company name *</label>
+              <label style={labelStyle}>Company name *</label>
               <input
                 type="text"
                 value={companyName}
                 onChange={(e) => setCompanyName(e.target.value)}
                 required
                 placeholder="Acme Sales Co."
-                className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2.5 text-sm placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors"
+                style={inputStyle}
+                onFocus={(e) => { e.currentTarget.style.borderColor = "var(--accent)"; }}
+                onBlur={(e) => { e.currentTarget.style.borderColor = "var(--border)"; }}
               />
             </div>
 
             <div>
-              <label className="block text-sm text-gray-400 mb-1.5">Industry</label>
+              <label style={labelStyle}>Industry</label>
               <select
                 value={industry}
                 onChange={(e) => setIndustry(e.target.value)}
-                className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
+                style={{ ...inputStyle, cursor: "pointer" }}
+                onFocus={(e) => { e.currentTarget.style.borderColor = "var(--accent)"; }}
+                onBlur={(e) => { e.currentTarget.style.borderColor = "var(--border)"; }}
               >
                 <option value="">Select industry</option>
                 <option value="saas">SaaS / Software</option>
@@ -114,11 +145,13 @@ export default function OnboardingPage() {
             </div>
 
             <div>
-              <label className="block text-sm text-gray-400 mb-1.5">Sales team size</label>
+              <label style={labelStyle}>Sales team size</label>
               <select
                 value={teamSize}
                 onChange={(e) => setTeamSize(e.target.value)}
-                className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
+                style={{ ...inputStyle, cursor: "pointer" }}
+                onFocus={(e) => { e.currentTarget.style.borderColor = "var(--accent)"; }}
+                onBlur={(e) => { e.currentTarget.style.borderColor = "var(--border)"; }}
               >
                 <option value="">Select size</option>
                 <option value="1-5">1–5 reps</option>
@@ -131,7 +164,12 @@ export default function OnboardingPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-medium py-2.5 rounded-lg text-sm transition-colors mt-2"
+              style={{
+                width: "100%", background: "var(--accent)", color: "#fff",
+                fontWeight: 600, padding: "12px", borderRadius: "8px",
+                fontSize: "14px", border: "none", cursor: loading ? "not-allowed" : "pointer",
+                opacity: loading ? 0.7 : 1, transition: "opacity .15s", marginTop: "4px",
+              }}
             >
               {loading ? "Setting up…" : "Launch my workspace →"}
             </button>
