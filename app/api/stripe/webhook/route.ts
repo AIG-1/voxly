@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import {stripe} from "@/lib/stripe";
+import stripe from "@/lib/stripe";
 import { createServiceClient } from "@/lib/supabase-service";
 import type Stripe from "stripe";
 
@@ -14,7 +14,7 @@ export async function POST(req: Request) {
 
   let event: Stripe.Event;
   try {
-    event = stripe().webhooks.constructEvent(body, sig, secret);
+    event = stripe.webhooks.constructEvent(body, sig, secret);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Webhook verification failed";
     return NextResponse.json({ error: message }, { status: 400 });
@@ -27,7 +27,6 @@ export async function POST(req: Request) {
       const session = event.data.object as Stripe.Checkout.Session;
       const companyId = session.metadata?.company_id;
       if (!companyId) break;
-
       await service
         .from("companies")
         .update({
@@ -38,7 +37,6 @@ export async function POST(req: Request) {
         .eq("id", companyId);
       break;
     }
-
     case "customer.subscription.deleted": {
       const sub = event.data.object as Stripe.Subscription;
       await service
@@ -47,10 +45,8 @@ export async function POST(req: Request) {
         .eq("stripe_subscription_id", sub.id);
       break;
     }
-
     case "customer.subscription.updated": {
       const sub = event.data.object as Stripe.Subscription;
-      // If reactivated after cancel
       if (sub.status === "active") {
         await service
           .from("companies")
@@ -59,7 +55,6 @@ export async function POST(req: Request) {
       }
       break;
     }
-
     case "invoice.payment_failed": {
       const invoice = event.data.object as Stripe.Invoice;
       if (invoice.subscription) {
