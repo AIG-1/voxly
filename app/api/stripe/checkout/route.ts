@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase-server";
 import { createServiceClient } from "@/lib/supabase-service";
-import { stripe } from "@/lib/stripe";
+import stripe from "@/lib/stripe";
 
 export async function POST(req: Request) {
   const supabase = await createClient();
@@ -27,33 +27,30 @@ export async function POST(req: Request) {
 
   if (!company) return NextResponse.json({ error: "Company not found" }, { status: 404 });
 
-  // Already active — send to portal instead
   if (company.subscription_status === "active") {
     return NextResponse.json({ error: "Already subscribed" }, { status: 400 });
   }
 
-  const priceId = process.env.STRIPE_PRICE_ID;
+  const priceId = process.env.STRIPE_PRICE_ID_MONTHLY;
   if (!priceId) return NextResponse.json({ error: "Price not configured" }, { status: 500 });
 
-  const origin = req.headers.get("origin") ?? process.env.NEXT_PUBLIC_APP_URL ?? "https://voxly.app";
+  const origin = req.headers.get("origin") ?? "https://voxly.applied-intelholdings.net";
 
-  // Create or reuse Stripe customer
   let customerId = company.stripe_customer_id;
   if (!customerId) {
-    const customer = await stripe().customers.create({
+    const customer = await stripe.customers.create({
       email: user.email,
       name: company.name,
       metadata: { company_id: company.id },
     });
     customerId = customer.id;
-
     await service
       .from("companies")
       .update({ stripe_customer_id: customerId })
       .eq("id", company.id);
   }
 
-  const session = await stripe.checkout().sessions.create({
+  const session = await stripe.checkout.sessions.create({
     customer: customerId,
     mode: "subscription",
     payment_method_types: ["card"],
