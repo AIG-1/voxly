@@ -32,12 +32,7 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <style>{`
-        .call-row { transition: background .15s; }
-        .call-row:hover { background: var(--bg-alt) !important; }
-      `}</style>
-
-      <div style={{ marginBottom: "32px" }}>
+            <div style={{ marginBottom: "32px" }}>
         <h1 style={{ fontSize: "22px", fontWeight: 700, color: "var(--ink)" }}>
           {companyName} Overview
         </h1>
