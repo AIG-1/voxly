@@ -102,7 +102,7 @@ export default async function DashboardPage() {
             {calls.slice(0, 5).map((call, i) => (
               
                 key={call.id}
-                href={`/dashboard/calls/${call.id}`}
+              <a href={`/dashboard/calls/${call.id}`}
                 className="call-row"
                 style={{
                   display: "flex", alignItems: "center", justifyContent: "space-between",
