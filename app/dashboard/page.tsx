@@ -86,7 +86,8 @@ export default async function DashboardPage() {
               Upload your first sales call recording to get started.
             </p>
             
-              href="/dashboard/calls"
+              <a
+                href="/dashboard/calls"
               style={{
                 display: "inline-block", background: "var(--accent)", color: "#fff",
                 fontSize: "13px", fontWeight: 600, padding: "8px 20px",
