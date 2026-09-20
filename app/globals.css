@@ -34,4 +34,7 @@ a { text-decoration: none; color: inherit; }
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+
+  .call-row { transition: background .15s; }
+.call-row:hover { background: var(--bg-alt) !important; }
 }
