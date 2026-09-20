@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 export const metadata = {
   title: "Voxly — AI Sales Call Coaching",
   description: "Get Gong-level coaching at a fraction of the price. Voxly analyzes every sales call, scores your reps, and tells them exactly what to fix.",
@@ -408,18 +406,6 @@ export default function LandingPage() {
         </div>
       </footer>
 
-      <style>{`
-        .nav-link:hover { color: #6366f1 !important; }
-        .cta-btn { transition: opacity .15s, transform .15s; }
-        .cta-btn:hover { opacity: .9; transform: translateY(-1px); }
-        .outline-btn:hover { background: #f0f4ff !important; }
-        .feature-card { transition: box-shadow .15s, transform .15s; }
-        .feature-card:hover { box-shadow: 0 8px 32px rgba(99,102,241,.12); transform: translateY(-2px); }
-        @media (max-width: 640px) {
-          table { font-size: 12px !important; }
-          td, th { padding: 10px 12px !important; }
-        }
-      `}</style>
     </div>
   );
 }
