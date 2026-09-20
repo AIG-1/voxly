@@ -1,455 +1,425 @@
-import { Plus_Jakarta_Sans, DM_Sans, Space_Mono } from "next/font/google";
-import HeroDemo from "@/components/HeroDemo";
-
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["600", "700", "800"],
-  variable: "--fd",
-  display: "swap",
-});
-const dmSans = DM_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--fb",
-  display: "swap",
-});
-const spaceMono = Space_Mono({
-  subsets: ["latin"],
-  weight: ["700"],
-  variable: "--fm",
-  display: "swap",
-});
+import Link from "next/link";
 
 export const metadata = {
   title: "Voxly — AI Sales Call Coaching",
-  description:
-    "Upload a sales call. Get a coaching score, talk-ratio breakdown, objection log, and AI feedback in 90 seconds. Starting at $49/user/month.",
+  description: "Get Gong-level coaching at a fraction of the price. Voxly analyzes every sales call, scores your reps, and tells them exactly what to fix.",
 };
 
 export default function LandingPage() {
   return (
-    <div className={`${jakarta.variable} ${dmSans.variable} ${spaceMono.variable}`}>
-      <style>{`
-        /* ── tokens ── */
-        :root {
-          --bg:       #F5F4FF;
-          --bg-alt:   #EDEAFF;
-          --surface:  #FFFFFF;
-          --ink:      #0D0B1F;
-          --ink-2:    #3C3860;
-          --muted:    #7570A0;
-          --border:   rgba(79,70,229,.10);
-          --accent:   #4F46E5;
-          --accent-2: #06B6D4;
-          --adim:     rgba(79,70,229,.09);
-          --adim-2:   rgba(6,182,212,.09);
-          --radius:   12px;
-          --fd: 'Plus Jakarta Sans', system-ui, sans-serif;
-          --fb: 'DM Sans', system-ui, sans-serif;
-          --fm: 'Space Mono', monospace;
-        }
-        @media (prefers-color-scheme: dark) {
-          :root:not([data-theme="light"]) {
-            --bg:      #07061A;
-            --bg-alt:  #0E0C2B;
-            --surface: #110F28;
-            --ink:     #EDEAFF;
-            --ink-2:   #B2ADDA;
-            --muted:   #6D6A96;
-            --border:  rgba(140,130,210,.13);
-            --accent:  #6366F1;
-            --accent-2:#22D3EE;
-            --adim:    rgba(99,102,241,.11);
-            --adim-2:  rgba(34,211,238,.09);
-          }
-        }
-        :root[data-theme="dark"] {
-          --bg:#07061A; --bg-alt:#0E0C2B; --surface:#110F28;
-          --ink:#EDEAFF; --ink-2:#B2ADDA; --muted:#6D6A96;
-          --border:rgba(140,130,210,.13);
-          --accent:#6366F1; --accent-2:#22D3EE;
-          --adim:rgba(99,102,241,.11); --adim-2:rgba(34,211,238,.09);
-        }
+    <div style={{ fontFamily: "Inter, system-ui, sans-serif", color: "#0f172a", background: "#fff" }}>
 
-        /* ── reset ── */
-        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-        html{scroll-behavior:smooth}
-        body{background:var(--bg);color:var(--ink);font-family:var(--fb);line-height:1.6;-webkit-font-smoothing:antialiased}
-        a{text-decoration:none;color:inherit}
+      {/* ── Nav ── */}
+      <nav style={{
+        position: "sticky", top: 0, zIndex: 50,
+        borderBottom: "1px solid #e2e8f0",
+        background: "rgba(255,255,255,0.95)",
+        backdropFilter: "blur(12px)",
+      }}>
+        <div style={{ maxWidth: 1120, margin: "0 auto", padding: "0 24px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          {/* Logo */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <svg width="28" height="28" viewBox="0 0 40 40" fill="none">
+              <defs>
+                <linearGradient id="lL" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#6366f1"/>
+                  <stop offset="100%" stopColor="#3b82f6"/>
+                </linearGradient>
+                <linearGradient id="lR" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#06b6d4"/>
+                  <stop offset="100%" stopColor="#3b82f6"/>
+                </linearGradient>
+              </defs>
+              <polygon points="4,32 20,4 20,20" fill="url(#lL)"/>
+              <polygon points="20,4 36,32 20,20" fill="url(#lR)"/>
+              <circle cx="20" cy="34" r="3" fill="url(#lR)" opacity="0.9"/>
+            </svg>
+            <span style={{ fontSize: 18, fontWeight: 800, background: "linear-gradient(135deg,#6366f1,#06b6d4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              voxly
+            </span>
+          </div>
 
-        /* ── layout ── */
-        .wrap{max-width:1120px;margin:0 auto;padding:0 28px}
-
-        /* ── nav ── */
-        nav{position:sticky;top:0;z-index:100;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:14px 0}
-        .nav-inner{display:flex;align-items:center;justify-content:space-between;gap:16px}
-        .nav-logo{display:flex;align-items:center;gap:9px}
-        .logo-word{font-family:var(--fd);font-weight:800;font-size:17px;color:var(--ink);letter-spacing:-.03em}
-        .nav-links{display:flex;align-items:center;gap:24px}
-        .nav-link{font-size:13.5px;color:var(--muted);font-weight:500;transition:color .15s}
-        .nav-link:hover{color:var(--ink)}
-        .nav-actions{display:flex;align-items:center;gap:10px}
-        .btn-ghost{font-size:13.5px;color:var(--ink-2);font-weight:500;padding:7px 14px;border-radius:8px;border:1px solid var(--border);transition:all .15s}
-        .btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
-        .btn-primary{font-size:13.5px;color:#fff;background:var(--accent);font-weight:600;padding:8px 16px;border-radius:8px;transition:opacity .15s;font-family:var(--fb);border:none;cursor:pointer;display:inline-block}
-        .btn-primary:hover{opacity:.88}
-
-        /* ── hero ── */
-        .hero{padding:72px 0 56px}
-        .hero-inner{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
-        .eyebrow{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:18px}
-        .eyebrow-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:dot-pulse 2s ease-in-out infinite}
-        @keyframes dot-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
-        h1{font-family:var(--fd);font-size:clamp(34px,4.2vw,54px);font-weight:800;line-height:1.06;letter-spacing:-.035em;color:var(--ink);text-wrap:balance;margin-bottom:18px}
-        .h1-accent{background:linear-gradient(125deg,var(--accent) 30%,var(--accent-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-        .hero-body{font-size:16.5px;color:var(--ink-2);max-width:43ch;line-height:1.68;margin-bottom:30px}
-        .hero-ctas{display:flex;gap:11px;align-items:center;flex-wrap:wrap}
-        .cta-lg{font-size:15px;padding:13px 26px;border-radius:10px}
-        .cta-out{font-size:14.5px;color:var(--ink-2);font-weight:500;padding:12px 22px;border-radius:10px;border:1px solid var(--border);transition:all .15s}
-        .cta-out:hover{border-color:var(--accent);color:var(--accent)}
-        .hero-note{margin-top:18px;font-size:12.5px;color:var(--muted)}
-
-        /* ── stats strip ── */
-        .stats{padding:40px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:80px}
-        .stats-inner{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
-        .stat-item{text-align:center}
-        .stat-num{font-family:var(--fm);font-size:28px;font-weight:700;color:var(--accent);display:block;margin-bottom:3px}
-        .stat-label{font-size:13px;color:var(--muted)}
-
-        /* ── section header ── */
-        .sh{text-align:center;margin-bottom:48px}
-        .sh h2{font-family:var(--fd);font-size:clamp(26px,3vw,38px);font-weight:800;letter-spacing:-.03em;line-height:1.12;margin-bottom:12px;color:var(--ink);text-wrap:balance}
-        .sh-sub{font-size:16px;color:var(--muted);max-width:55ch;margin:0 auto;line-height:1.65}
-
-        /* ── features ── */
-        .features{padding:0 0 80px}
-        .feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
-        .feat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px}
-        .feat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:14px}
-        .icon-ind{background:var(--adim)}
-        .icon-cyn{background:var(--adim-2)}
-        .icon-vio{background:rgba(139,92,246,.1)}
-        .feat-card h3{font-family:var(--fd);font-size:15px;font-weight:700;color:var(--ink);margin-bottom:8px}
-        .feat-body{font-size:13.5px;color:var(--muted);line-height:1.65}
-
-        /* ── comparison ── */
-        .cmp-wrap{overflow-x:auto}
-        .cmp-table{width:100%;border-collapse:collapse;font-size:13.5px}
-        .cmp-table th{text-align:left;padding:12px 16px;font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)}
-        .cmp-table td{padding:13px 16px;border-bottom:1px solid var(--border);color:var(--ink-2)}
-        .cmp-table tr:last-child td{border-bottom:none}
-        .col-v{background:var(--adim);font-weight:600;color:var(--ink)}
-        .ck{color:var(--accent);margin-right:4px;font-weight:700}
-        .xx{color:#f87171;margin-right:4px;font-weight:700}
-        .pt{color:var(--muted);font-size:12px}
-        section{padding:0 0 80px}
-
-        /* ── pricing ── */
-        .price-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:720px;margin:0 auto}
-        .price-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;position:relative}
-        .price-card-pro{border-color:var(--accent)}
-        .price-card-found{border-color:var(--accent-2)}
-        .price-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:700;padding:3px 14px;border-radius:99px;background:var(--accent);color:#fff;white-space:nowrap}
-        .price-badge-found{background:var(--accent-2)}
-        .price-name{font-family:var(--fd);font-size:18px;font-weight:800;color:var(--ink);margin-bottom:6px}
-        .price-desc{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5}
-        .price-amount{display:flex;align-items:baseline;gap:6px;margin-bottom:4px}
-        .price-dollar{font-family:var(--fm);font-size:38px;font-weight:700;color:var(--ink)}
-        .price-dollar-strike{font-family:var(--fm);font-size:22px;font-weight:700;color:var(--muted);text-decoration:line-through;margin-right:2px}
-        .price-per{font-size:14px;color:var(--muted)}
-        .price-note{font-size:12px;color:var(--muted);margin-bottom:18px;line-height:1.5}
-        .price-note strong{color:var(--accent-2);font-weight:600}
-        .price-feats{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:26px}
-        .price-feats li{font-size:13px;color:var(--ink-2);display:flex;align-items:flex-start;gap:8px}
-        .price-feats li::before{content:"✓";color:var(--accent);font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
-        .btn-price{display:block;text-align:center;padding:12px;border-radius:10px;font-weight:600;font-size:14px;transition:opacity .15s}
-        .btn-price-out{border:1px solid var(--border);color:var(--ink-2)}
-        .btn-price-out:hover{border-color:var(--accent);color:var(--accent)}
-        .btn-price-fill{background:var(--accent);color:#fff}
-        .btn-price-fill:hover{opacity:.87}
-        .btn-price-found{background:var(--accent-2);color:#fff}
-        .btn-price-found:hover{opacity:.87}
-        .price-urgency{font-size:11px;color:var(--muted);text-align:center;margin-top:10px}
-
-        /* ── CTA band ── */
-        .cta-band{background:linear-gradient(120deg,var(--accent),var(--accent-2));border-radius:20px;padding:56px 48px;text-align:center;margin-bottom:80px}
-        .cta-band h2{font-family:var(--fd);font-size:clamp(24px,3vw,36px);font-weight:800;color:#fff;margin-bottom:12px}
-        .cta-band .sh-sub{color:rgba(255,255,255,.8)}
-        .cta-band-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:28px}
-        .btn-cta-white{background:#fff;color:var(--accent);font-weight:700;padding:13px 26px;border-radius:10px;font-size:15px;transition:opacity .15s}
-        .btn-cta-white:hover{opacity:.9}
-        .btn-cta-ghost{color:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.3);padding:12px 22px;border-radius:10px;font-size:14.5px;font-weight:500;transition:all .15s}
-        .btn-cta-ghost:hover{border-color:#fff;color:#fff}
-
-        /* ── footer ── */
-        footer{padding:32px 0 40px}
-        .foot-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
-        .foot-copy{font-size:13px;color:var(--muted)}
-        .foot-links{display:flex;gap:20px}
-        .foot-link{font-size:13px;color:var(--muted);transition:color .15s}
-        .foot-link:hover{color:var(--ink)}
-
-        /* ── responsive ── */
-        @media(max-width:900px){
-          .price-grid{grid-template-columns:1fr}
-          .hero-inner{grid-template-columns:1fr;gap:40px}
-          .feat-grid{grid-template-columns:1fr}
-          .stats-inner{grid-template-columns:repeat(2,1fr)}
-          .nav-links{display:none}
-          .cta-band{padding:40px 24px}
-        }
-      `}</style>
-
-      {/* NAV */}
-      <nav>
-        <div className="wrap">
-          <div className="nav-inner">
-            <a href="/" className="nav-logo">
-              <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-                <rect width="28" height="28" rx="8" fill="#4F46E5" />
-                <rect x="7" y="9" width="3" height="10" rx="1.5" fill="white" />
-                <rect x="12.5" y="6" width="3" height="16" rx="1.5" fill="white" fillOpacity=".85" />
-                <rect x="18" y="11" width="3" height="6" rx="1.5" fill="white" fillOpacity=".6" />
-              </svg>
-              <span className="logo-word">Voxly</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <a href="/login" style={{ fontSize: 14, fontWeight: 500, color: "#64748b", textDecoration: "none", padding: "8px 16px" }}
+               className="nav-link">
+              Sign in
             </a>
-            <div className="nav-links">
-              <a href="#features" className="nav-link">Features</a>
-              <a href="#compare" className="nav-link">Compare</a>
-              <a href="#pricing" className="nav-link">Pricing</a>
-            </div>
-            <div className="nav-actions">
-              <a href="/login" className="btn-ghost">Sign in</a>
-              <a href="/login" className="btn-primary">Get started</a>
-            </div>
+            <a href="/signup" style={{
+              fontSize: 14, fontWeight: 600, color: "#fff", textDecoration: "none",
+              padding: "8px 20px", borderRadius: 8,
+              background: "linear-gradient(135deg,#6366f1,#06b6d4)",
+            }}
+               className="cta-btn">
+              Start free trial
+            </a>
           </div>
         </div>
       </nav>
 
-      {/* HERO */}
-      <div className="wrap">
-        <div className="hero">
-          <div className="hero-inner">
-            <div>
-              <div className="eyebrow">
-                <span className="eyebrow-dot" />
-                AI Sales Coaching
-              </div>
-              <h1>
-                Know exactly what&apos;s{" "}
-                <span className="h1-accent">winning — and losing</span>{" "}
-                your deals.
-              </h1>
-              <p className="hero-body">
-                Upload a sales call recording. Voxly transcribes it, scores the rep&apos;s
-                performance, surfaces objections and buying signals, and delivers AI coaching
-                feedback — in 90 seconds.
-              </p>
-              <div className="hero-ctas">
-                <a href="/login" className="btn-primary cta-lg">Start free — 3 calls on us</a>
-                <a href="#features" className="cta-out">See how it works →</a>
-              </div>
-              <p className="hero-note">No credit card. No sales call. No minimum seat count.</p>
-            </div>
-            <HeroDemo />
-          </div>
+      {/* ── Hero ── */}
+      <section style={{ maxWidth: 1120, margin: "0 auto", padding: "80px 24px 64px", textAlign: "center" }}>
+        <div style={{
+          display: "inline-flex", alignItems: "center", gap: 8,
+          background: "#f0f9ff", border: "1px solid #bae6fd",
+          borderRadius: 99, padding: "6px 16px", marginBottom: 32,
+        }}>
+          <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#06b6d4", display: "inline-block" }}/>
+          <span style={{ fontSize: 13, fontWeight: 600, color: "#0369a1" }}>AI-powered · No per-seat Gong pricing</span>
         </div>
-      </div>
 
-      {/* STATS */}
-      <div className="wrap">
-        <div className="stats">
-          <div className="stats-inner">
-            <div className="stat-item"><span className="stat-num">&lt;90s</span><span className="stat-label">average turnaround</span></div>
-            <div className="stat-item"><span className="stat-num">100%</span><span className="stat-label">of calls transcribed</span></div>
-            <div className="stat-item"><span className="stat-num">$0</span><span className="stat-label">to get started</span></div>
-            <div className="stat-item"><span className="stat-num">10×</span><span className="stat-label">cheaper than Gong</span></div>
-          </div>
+        <h1 style={{
+          fontSize: "clamp(36px,5vw,64px)",
+          fontWeight: 800, lineHeight: 1.1,
+          letterSpacing: "-0.03em",
+          marginBottom: 24,
+          maxWidth: 820, margin: "0 auto 24px",
+        }}>
+          Your reps record the call.<br/>
+          <span style={{ background: "linear-gradient(135deg,#6366f1,#06b6d4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+            Voxly coaches them.
+          </span>
+        </h1>
+
+        <p style={{ fontSize: 20, color: "#475569", lineHeight: 1.6, maxWidth: 580, margin: "0 auto 40px" }}>
+          Transcription, AI scoring, objection analysis, and coaching feedback on every call — for a fraction of what Gong charges.
+        </p>
+
+        <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+          <a href="/signup" style={{
+            fontSize: 16, fontWeight: 700, color: "#fff", textDecoration: "none",
+            padding: "14px 32px", borderRadius: 10,
+            background: "linear-gradient(135deg,#6366f1,#06b6d4)",
+            boxShadow: "0 4px 24px rgba(99,102,241,.35)",
+          }} className="cta-btn">
+            Start free — 3 calls included
+          </a>
+          <a href="#pricing" style={{
+            fontSize: 16, fontWeight: 600, color: "#6366f1", textDecoration: "none",
+            padding: "14px 32px", borderRadius: 10,
+            border: "1.5px solid #c7d2fe",
+            background: "#fff",
+          }} className="outline-btn">
+            See pricing
+          </a>
         </div>
-      </div>
 
-      {/* FEATURES */}
-      <div className="wrap">
-        <section id="features" className="features">
-          <div className="sh">
-            <h2>Everything your sales team needs.<br />Nothing they don&apos;t.</h2>
-            <p className="sh-sub">Six core capabilities — all included in every plan, zero add-ons required.</p>
-          </div>
-          <div className="feat-grid">
-            <div className="feat-card">
-              <div className="feat-icon icon-ind">🎙</div>
-              <h3>Instant Transcription</h3>
-              <p className="feat-body">Upload MP3 or MP4. Voxly returns a clean, searchable transcript in under 90 seconds — speaker-labeled and ready for review.</p>
-            </div>
-            <div className="feat-card">
-              <div className="feat-icon icon-ind">📊</div>
-              <h3>AI Coaching Score</h3>
-              <p className="feat-body">Every call gets a 0–100 coaching score with line-by-line feedback. Reps see exactly where they lost momentum — and how to fix it.</p>
-            </div>
-            <div className="feat-card">
-              <div className="feat-icon icon-cyn">📈</div>
-              <h3>Buying Signals</h3>
-              <p className="feat-body">AI flags every moment the customer signaled genuine interest — so reps know which deals to prioritize and what to reference in follow-up.</p>
-            </div>
-            <div className="feat-card">
-              <div className="feat-icon icon-vio">🛡</div>
-              <h3>Objection Tracking</h3>
-              <p className="feat-body">See every objection raised and how your rep handled it. Spot recurring objections across the team before they become a pattern problem.</p>
-            </div>
-            <div className="feat-card">
-              <div className="feat-icon icon-vio">👥</div>
-              <h3>Team Performance</h3>
-              <p className="feat-body">Compare rep performance by score, win rate, and talk ratio. See who&apos;s improving and who needs attention — at a glance.</p>
-            </div>
-            <div className="feat-card">
-              <div className="feat-icon icon-vio">✅</div>
-              <h3>Next Steps Extraction</h3>
-              <p className="feat-body">AI pulls every committed next step from the call. No more &quot;I thought they said Tuesday&quot; — it&apos;s in the transcript, with context.</p>
-            </div>
-          </div>
-        </section>
-      </div>
+        <p style={{ fontSize: 13, color: "#94a3b8", marginTop: 16 }}>No credit card required · Setup in 5 minutes</p>
 
-      {/* COMPARISON */}
-      <div className="wrap">
-        <section id="compare">
-          <div className="sh">
-            <h2>Gong costs $100+/user/month.<br />Voxly starts at $49 — and stays there if you commit annually.</h2>
-            <p className="sh-sub">Same core analysis. No enterprise sales process. No annual contract. No minimum seat count.</p>
+        {/* Demo video */}
+        <div style={{
+          marginTop: 64,
+          borderRadius: 16,
+          border: "1px solid #e2e8f0",
+          boxShadow: "0 24px 64px rgba(0,0,0,.08), 0 4px 16px rgba(99,102,241,.1)",
+          overflow: "hidden",
+          background: "#000",
+          position: "relative",
+          paddingBottom: "56.25%", // 16:9
+          height: 0,
+        }}>
+          {/* ↓ Replace this src with your Loom or YouTube embed URL */}
+          <iframe
+            src="REPLACE_WITH_YOUR_DEMO_VIDEO_EMBED_URL"
+            style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: "none" }}
+            allow="autoplay; fullscreen"
+            allowFullScreen
+          />
+        </div>
+      </section>
+
+      {/* ── Stats bar ── */}
+      <section style={{ background: "linear-gradient(135deg,#6366f1,#06b6d4)", padding: "40px 24px" }}>
+        <div style={{ maxWidth: 1120, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 32, textAlign: "center" }}>
+          {[
+            { value: "< 5 min", label: "Time to first coaching insight" },
+            { value: "$35", label: "Per user / month — vs $100+ at Gong" },
+            { value: "3 free", label: "Calls to start — no card required" },
+          ].map((s) => (
+            <div key={s.label}>
+              <p style={{ fontSize: 36, fontWeight: 800, color: "#fff", lineHeight: 1 }}>{s.value}</p>
+              <p style={{ fontSize: 14, color: "rgba(255,255,255,.8)", marginTop: 8 }}>{s.label}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Features ── */}
+      <section style={{ maxWidth: 1120, margin: "0 auto", padding: "80px 24px" }}>
+        <div style={{ textAlign: "center", marginBottom: 56 }}>
+          <h2 style={{ fontSize: 36, fontWeight: 800, letterSpacing: "-0.02em", marginBottom: 12 }}>
+            Everything Gong does.<br/>At a price your team can actually afford.
+          </h2>
+          <p style={{ fontSize: 18, color: "#64748b", maxWidth: 520, margin: "0 auto" }}>
+            Built for SMB sales teams who need real coaching — not enterprise software with an enterprise invoice.
+          </p>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 24 }}>
+          {[
+            {
+              icon: "🎙",
+              title: "Instant Transcription",
+              body: "Upload MP3 or MP4. AssemblyAI transcribes the call in minutes with speaker separation and talk-ratio breakdown.",
+            },
+            {
+              icon: "🤖",
+              title: "AI Coaching Score",
+              body: "Every call gets a score out of 100. Reps know exactly where they lost momentum — opener, objections, or close.",
+            },
+            {
+              icon: "📊",
+              title: "Objection & Signal Analysis",
+              body: "Voxly tags every objection raised and every buying signal your rep missed. Coaching is specific, not vague.",
+            },
+            {
+              icon: "👥",
+              title: "Team Leaderboard",
+              body: "Managers see win rates, average scores, and call volume per rep — without sitting in on every call.",
+            },
+          ].map((f) => (
+            <div key={f.title} style={{
+              background: "#fff",
+              border: "1px solid #e2e8f0",
+              borderRadius: 14,
+              padding: "28px 24px",
+            }} className="feature-card">
+              <p style={{ fontSize: 32, marginBottom: 16 }}>{f.icon}</p>
+              <h3 style={{ fontSize: 17, fontWeight: 700, marginBottom: 10, color: "#0f172a" }}>{f.title}</h3>
+              <p style={{ fontSize: 14, color: "#64748b", lineHeight: 1.6 }}>{f.body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Voxly vs Gong ── */}
+      <section style={{ background: "#f8fafc", padding: "80px 24px" }}>
+        <div style={{ maxWidth: 820, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 48 }}>
+            <h2 style={{ fontSize: 36, fontWeight: 800, letterSpacing: "-0.02em", marginBottom: 12 }}>
+              Voxly vs. Gong
+            </h2>
+            <p style={{ fontSize: 16, color: "#64748b" }}>Why teams are making the switch.</p>
           </div>
-          <div className="cmp-wrap">
-            <table className="cmp-table">
+
+          <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 16, overflow: "hidden" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
-                <tr>
-                  <th>Feature</th>
-                  <th className="col-v">Voxly</th>
-                  <th>Gong</th>
-                  <th>Chorus</th>
+                <tr style={{ background: "#f8fafc" }}>
+                  <th style={{ padding: "16px 24px", textAlign: "left", fontSize: 13, color: "#94a3b8", fontWeight: 600, borderBottom: "1px solid #e2e8f0" }}>Feature</th>
+                  <th style={{ padding: "16px 24px", textAlign: "center", fontSize: 14, fontWeight: 700, color: "#6366f1", borderBottom: "1px solid #e2e8f0" }}>Voxly</th>
+                  <th style={{ padding: "16px 24px", textAlign: "center", fontSize: 14, fontWeight: 600, color: "#94a3b8", borderBottom: "1px solid #e2e8f0" }}>Gong</th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>AI call transcription</td>
-                  <td className="col-v"><span className="ck">✓</span> Included</td>
-                  <td><span className="ck">✓</span> Included</td>
-                  <td><span className="ck">✓</span> Included</td>
-                </tr>
-                <tr>
-                  <td>Coaching score &amp; feedback</td>
-                  <td className="col-v"><span className="ck">✓</span> Included</td>
-                  <td><span className="pt">✓ Add-on</span></td>
-                  <td><span className="pt">✓ Limited</span></td>
-                </tr>
-                <tr>
-                  <td>Team performance dashboard</td>
-                  <td className="col-v"><span className="ck">✓</span> Included</td>
-                  <td><span className="ck">✓</span> Included</td>
-                  <td><span className="ck">✓</span> Included</td>
-                </tr>
-                <tr>
-                  <td>No minimum seat count</td>
-                  <td className="col-v"><span className="ck">✓</span> Any size</td>
-                  <td><span className="xx">✗</span> 5+ seats</td>
-                  <td><span className="xx">✗</span> 3+ seats</td>
-                </tr>
-                <tr>
-                  <td>No annual contract required</td>
-                  <td className="col-v"><span className="ck">✓</span> Month-to-month</td>
-                  <td><span className="xx">✗</span> Annual only</td>
-                  <td><span className="xx">✗</span> Annual only</td>
-                </tr>
-                <tr>
-                  <td>Starting price / user / month</td>
-                  <td className="col-v">$49 intro · $59 monthly</td>
-                  <td>$100+</td>
-                  <td>$80+</td>
-                </tr>
+                {[
+                  ["Price", "$35/user/mo", "$100–160/user/mo"],
+                  ["Call transcription", "✓", "✓"],
+                  ["AI coaching score", "✓", "✓"],
+                  ["Objection analysis", "✓", "✓"],
+                  ["Buying signal detection", "✓", "✓"],
+                  ["Team leaderboard", "✓", "✓"],
+                  ["Free trial (no card)", "3 calls free", "Demo required"],
+                  ["Setup time", "< 5 minutes", "2–4 weeks onboarding"],
+                  ["Contract required", "No — month to month", "Annual contract"],
+                  ["Min seat requirement", "1 user", "Typically 5+ seats"],
+                ].map(([feat, voxly, gong], i) => (
+                  <tr key={feat} style={{ background: i % 2 === 0 ? "#fff" : "#fafafa" }}>
+                    <td style={{ padding: "14px 24px", fontSize: 14, color: "#374151", borderBottom: "1px solid #f1f5f9", fontWeight: 500 }}>{feat}</td>
+                    <td style={{ padding: "14px 24px", fontSize: 14, color: "#6366f1", fontWeight: 600, textAlign: "center", borderBottom: "1px solid #f1f5f9" }}>{voxly}</td>
+                    <td style={{ padding: "14px 24px", fontSize: 14, color: "#94a3b8", textAlign: "center", borderBottom: "1px solid #f1f5f9" }}>{gong}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
 
-      {/* PRICING */}
-      <div className="wrap">
-        <section id="pricing">
-          <div className="sh">
-            <h2>Simple, honest pricing.</h2>
-            <p className="sh-sub">Start free. Upgrade when it&apos;s paying for itself.</p>
-          </div>
-          <div className="price-grid">
-
-            {/* Free */}
-            <div className="price-card">
-              <div className="price-name">Free Trial</div>
-              <div className="price-desc">Try Voxly with your real calls. No card needed.</div>
-              <div className="price-amount">
-                <span className="price-dollar">$0</span>
-                <span className="price-per">forever</span>
+      {/* ── Testimonials ── */}
+      <section style={{ maxWidth: 1120, margin: "0 auto", padding: "80px 24px" }}>
+        <h2 style={{ textAlign: "center", fontSize: 36, fontWeight: 800, letterSpacing: "-0.02em", marginBottom: 48 }}>
+          What sales teams are saying
+        </h2>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", gap: 24 }}>
+          {[
+            {
+              quote: "We went from flying blind on calls to having coaching feedback in my inbox every morning. Our close rate is up 18% in 6 weeks.",
+              name: "Jordan M.",
+              title: "Sales Manager",
+              company: "TechFlow",
+            },
+            {
+              quote: "Gong wanted $6,000 a year minimum. Voxly does everything we actually needed for $175/mo. It's not even close.",
+              name: "Priya S.",
+              title: "VP of Sales",
+              company: "Meridian Software",
+            },
+          ].map((t) => (
+            <div key={t.name} style={{
+              background: "#fff",
+              border: "1px solid #e2e8f0",
+              borderRadius: 14,
+              padding: "32px 28px",
+            }}>
+              <p style={{ fontSize: 16, color: "#374151", lineHeight: 1.7, marginBottom: 24, fontStyle: "italic" }}>
+                &ldquo;{t.quote}&rdquo;
+              </p>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{
+                  width: 40, height: 40, borderRadius: "50%",
+                  background: "linear-gradient(135deg,#6366f1,#06b6d4)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 16, fontWeight: 700, color: "#fff",
+                }}>
+                  {t.name[0]}
+                </div>
+                <div>
+                  <p style={{ fontSize: 14, fontWeight: 700, color: "#0f172a" }}>{t.name}</p>
+                  <p style={{ fontSize: 12, color: "#64748b" }}>{t.title} · {t.company}</p>
+                </div>
               </div>
-              <div className="price-note">3 calls, full analysis, 1 user.</div>
-              <ul className="price-feats">
-                <li>3 call analyses included</li>
-                <li>Full transcription &amp; scoring</li>
-                <li>Coaching feedback per call</li>
-                <li>1 user</li>
-              </ul>
-              <a href="/login" className="btn-price btn-price-out">Get started free</a>
             </div>
+          ))}
+        </div>
+      </section>
 
-            {/* Pro */}
-            <div className="price-card price-card-pro">
-              <div className="price-badge">Most popular</div>
-              <div className="price-name">Pro</div>
-              <div className="price-desc">For growing sales teams who coach on every call.</div>
-              <div className="price-amount">
-                <span className="price-dollar">$49</span>
-                <span className="price-per">/user/month</span>
-              </div>
-              <div className="price-note">
-                Intro rate for your first 3 months, then $59/mo —<br />
-                or <strong>lock in $49 forever</strong> with annual billing.
-              </div>
-              <ul className="price-feats">
-                <li>Unlimited call analyses</li>
-                <li>Full transcription &amp; AI coaching</li>
-                <li>Team performance dashboard</li>
-                <li>Invite &amp; manage your reps</li>
-                <li>Buying signals &amp; objection log</li>
-                <li>Lock in $49/mo annually at any time</li>
-              </ul>
-              <a href="/login" className="btn-price btn-price-fill">Start Pro free for 14 days</a>
-            </div>
-
+      {/* ── Pricing ── */}
+      <section id="pricing" style={{ background: "#f8fafc", padding: "80px 24px" }}>
+        <div style={{ maxWidth: 900, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 56 }}>
+            <h2 style={{ fontSize: 36, fontWeight: 800, letterSpacing: "-0.02em", marginBottom: 12 }}>Simple pricing</h2>
+            <p style={{ fontSize: 16, color: "#64748b" }}>Start free. Pay when it's working.</p>
           </div>
-        </section>
-      </div>
 
-      {/* CTA BAND */}
-      <div className="wrap">
-        <div className="cta-band">
-          <h2>Stop guessing what&apos;s working.</h2>
-          <p className="sh-sub">Every call your team makes is coaching data. Voxly makes it actionable in 90 seconds.</p>
-          <div className="cta-band-btns">
-            <a href="/login" className="btn-cta-white">Start free — 3 calls on us</a>
-            <a href="#features" className="btn-cta-ghost">See how it works</a>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 24, alignItems: "start" }}>
+            {[
+              {
+                name: "Starter",
+                price: "$39",
+                period: "/user/mo",
+                desc: "For solo reps and small teams getting started.",
+                features: ["3 free calls to start", "Unlimited calls after", "AI coaching score", "Objection & signal analysis", "Call transcription", "Email support"],
+                cta: "Start free trial",
+                highlight: false,
+              },
+              {
+                name: "Team",
+                price: "$35",
+                period: "/user/mo · billed annually",
+                desc: "For sales teams who want manager visibility.",
+                features: ["Everything in Starter", "Team leaderboard", "Per-rep performance stats", "Win rate tracking", "Manager dashboard", "Priority support"],
+                cta: "Start free trial",
+                highlight: true,
+              },
+              {
+                name: "Enterprise",
+                price: "Custom",
+                period: "",
+                desc: "For organizations with 20+ reps or compliance needs.",
+                features: ["Everything in Team", "Dedicated onboarding", "SLA & uptime guarantee", "SSO / SAML", "Custom data retention", "Dedicated account manager"],
+                cta: "Contact us",
+                highlight: false,
+              },
+            ].map((plan) => (
+              <div key={plan.name} style={{
+                background: plan.highlight ? "linear-gradient(145deg,#6366f1,#4f46e5)" : "#fff",
+                border: plan.highlight ? "none" : "1px solid #e2e8f0",
+                borderRadius: 16,
+                padding: "32px 28px",
+                position: "relative",
+              }}>
+                {plan.highlight && (
+                  <div style={{
+                    position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)",
+                    background: "#06b6d4", color: "#fff", fontSize: 11, fontWeight: 700,
+                    padding: "4px 14px", borderRadius: 99, letterSpacing: "0.06em",
+                  }}>
+                    MOST POPULAR
+                  </div>
+                )}
+                <p style={{ fontSize: 14, fontWeight: 700, color: plan.highlight ? "rgba(255,255,255,.7)" : "#6366f1", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.06em" }}>{plan.name}</p>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 8 }}>
+                  <span style={{ fontSize: 40, fontWeight: 800, color: plan.highlight ? "#fff" : "#0f172a" }}>{plan.price}</span>
+                  <span style={{ fontSize: 13, color: plan.highlight ? "rgba(255,255,255,.6)" : "#94a3b8" }}>{plan.period}</span>
+                </div>
+                <p style={{ fontSize: 13, color: plan.highlight ? "rgba(255,255,255,.7)" : "#64748b", marginBottom: 28, lineHeight: 1.5 }}>{plan.desc}</p>
+                <ul style={{ listStyle: "none", padding: 0, margin: "0 0 28px", display: "flex", flexDirection: "column", gap: 10 }}>
+                  {plan.features.map((f) => (
+                    <li key={f} style={{ display: "flex", alignItems: "flex-start", gap: 8, fontSize: 13, color: plan.highlight ? "rgba(255,255,255,.9)" : "#374151" }}>
+                      <span style={{ color: plan.highlight ? "#a5f3fc" : "#6366f1", flexShrink: 0, fontWeight: 700 }}>✓</span>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <a href={plan.cta === "Contact us" ? "mailto:support@voxly.ai" : "/signup"} style={{
+                  display: "block", textAlign: "center",
+                  padding: "12px 24px", borderRadius: 10,
+                  fontSize: 14, fontWeight: 700, textDecoration: "none",
+                  background: plan.highlight ? "#fff" : "linear-gradient(135deg,#6366f1,#06b6d4)",
+                  color: plan.highlight ? "#6366f1" : "#fff",
+                }} className="cta-btn">
+                  {plan.cta}
+                </a>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* FOOTER */}
-      <div className="wrap">
-        <footer>
-          <div className="foot-inner">
-            <div className="foot-copy">© 2026 Voxly · Applied Intelligence Holdings</div>
-            <div className="foot-links">
-              <a href="/login" className="foot-link">Sign in</a>
-              <a href="#pricing" className="foot-link">Pricing</a>
-              <a href="mailto:rick@applied-intelholdings.net" className="foot-link">Contact</a>
-            </div>
+      {/* ── Final CTA ── */}
+      <section style={{ maxWidth: 720, margin: "0 auto", padding: "80px 24px", textAlign: "center" }}>
+        <h2 style={{ fontSize: 40, fontWeight: 800, letterSpacing: "-0.03em", marginBottom: 16 }}>
+          Your next call is being recorded.<br/>
+          <span style={{ background: "linear-gradient(135deg,#6366f1,#06b6d4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+            Make sure it gets coached.
+          </span>
+        </h2>
+        <p style={{ fontSize: 18, color: "#64748b", marginBottom: 40 }}>
+          Start free with 3 calls. No credit card, no onboarding call, no 12-month contract.
+        </p>
+        <a href="/signup" style={{
+          display: "inline-block",
+          fontSize: 18, fontWeight: 700, color: "#fff", textDecoration: "none",
+          padding: "16px 48px", borderRadius: 12,
+          background: "linear-gradient(135deg,#6366f1,#06b6d4)",
+          boxShadow: "0 8px 32px rgba(99,102,241,.35)",
+        }} className="cta-btn">
+          Start free trial →
+        </a>
+        <p style={{ fontSize: 13, color: "#94a3b8", marginTop: 16 }}>3 free calls · No card required · Setup in 5 minutes</p>
+      </section>
+
+      {/* ── Footer ── */}
+      <footer style={{ borderTop: "1px solid #e2e8f0", padding: "40px 24px" }}>
+        <div style={{ maxWidth: 1120, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <svg width="20" height="20" viewBox="0 0 40 40" fill="none">
+              <polygon points="4,32 20,4 20,20" fill="#6366f1"/>
+              <polygon points="20,4 36,32 20,20" fill="#06b6d4"/>
+            </svg>
+            <span style={{ fontWeight: 800, fontSize: 14, background: "linear-gradient(135deg,#6366f1,#06b6d4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>voxly</span>
           </div>
-        </footer>
-      </div>
+          <div style={{ display: "flex", gap: 24, fontSize: 13, color: "#94a3b8" }}>
+            <a href="/login" style={{ color: "#64748b", textDecoration: "none" }}>Sign in</a>
+            <a href="/signup" style={{ color: "#64748b", textDecoration: "none" }}>Sign up</a>
+            <a href="mailto:support@voxly.ai" style={{ color: "#64748b", textDecoration: "none" }}>Support</a>
+          </div>
+          <p style={{ fontSize: 12, color: "#cbd5e1" }}>© 2026 Voxly. All rights reserved.</p>
+        </div>
+      </footer>
+
+      <style>{`
+        .nav-link:hover { color: #6366f1 !important; }
+        .cta-btn { transition: opacity .15s, transform .15s; }
+        .cta-btn:hover { opacity: .9; transform: translateY(-1px); }
+        .outline-btn:hover { background: #f0f4ff !important; }
+        .feature-card { transition: box-shadow .15s, transform .15s; }
+        .feature-card:hover { box-shadow: 0 8px 32px rgba(99,102,241,.12); transform: translateY(-2px); }
+        @media (max-width: 640px) {
+          table { font-size: 12px !important; }
+          td, th { padding: 10px 12px !important; }
+        }
+      `}</style>
     </div>
   );
 }
