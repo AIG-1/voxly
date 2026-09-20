@@ -32,6 +32,11 @@ export default async function DashboardPage() {
 
   return (
     <div>
+      <style>{`
+        .call-row { transition: background .15s; }
+        .call-row:hover { background: var(--bg-alt) !important; }
+      `}</style>
+
       <div style={{ marginBottom: "32px" }}>
         <h1 style={{ fontSize: "22px", fontWeight: 700, color: "var(--ink)" }}>
           {companyName} Overview
@@ -85,7 +90,7 @@ export default async function DashboardPage() {
             <p style={{ fontSize: "13px", marginBottom: "16px", color: "var(--muted)" }}>
               Upload your first sales call recording to get started.
             </p>
-            <a
+            
               href="/dashboard/calls"
               style={{
                 display: "inline-block", background: "var(--accent)", color: "#fff",
@@ -99,17 +104,17 @@ export default async function DashboardPage() {
         ) : (
           <div>
             {calls.slice(0, 5).map((call, i) => (
-              <a
+              
                 key={call.id}
                 href={`/dashboard/calls/${call.id}`}
+                className="call-row"
                 style={{
                   display: "flex", alignItems: "center", justifyContent: "space-between",
                   padding: "14px 20px",
                   borderBottom: i < Math.min(calls.length, 5) - 1 ? "1px solid var(--border)" : "none",
-                  textDecoration: "none", transition: "background .15s",
+                  textDecoration: "none",
+                  background: "transparent",
                 }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--bg-alt)"; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
               >
                 <div>
                   <p style={{ fontSize: "13px", fontWeight: 500, color: "var(--ink)" }}>
