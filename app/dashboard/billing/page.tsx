@@ -71,7 +71,7 @@ export default async function BillingPage() {
         </div>
 
         {isAdmin ? (
-          <BillingActions status={status} />
+          <BillingActions status={status} hasCustomer={!!company?.stripe_customer_id} />
         ) : (
           <p style={{ fontSize: "13px", color: "var(--muted)" }}>
             Contact your workspace admin to manage billing.
