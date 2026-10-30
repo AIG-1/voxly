@@ -4,7 +4,7 @@ let _instance: Stripe | null = null;
 
 function getInstance(): Stripe {
   if (!_instance) {
-    const key = process.env.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;
+const key = process.env.STRIPE_SECRET_KEY;
     if (!key) throw new Error("STRIPE_SECRET_KEY is not set");
     _instance = new Stripe(key, { apiVersion: "2025-02-24.acacia" });
   }
