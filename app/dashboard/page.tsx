@@ -144,11 +144,10 @@ export default async function DashboardPage() {
           <h2 style={{ fontWeight: 600, color: "var(--ink)", fontSize: "14px" }}>
             Recent Calls
           </h2>
-          
-           <a
-             href="/dashboard/calls"
-            style={{ fontSize: "13px", color: "var(--accent-2)", opacity: 0.9 }}
-             > 
+          <a
+            href="/dashboard/calls"
+            style={{ fontSize: "13px", color: "var(--accent)", opacity: 0.9, textDecoration: "none" }}
+          >
             View all
           </a>
         </div>
@@ -168,7 +167,7 @@ export default async function DashboardPage() {
             >
               Upload your first sales call recording to get started.
             </p>
-            
+            <a
               href="/dashboard/calls"
               style={{
                 display: "inline-block",
@@ -187,7 +186,7 @@ export default async function DashboardPage() {
         ) : (
           <div>
             {calls.slice(0, 5).map((call, i) => (
-              
+              <a
                 key={call.id}
                 href={`/dashboard/calls/${call.id}`}
                 className="call-row"
