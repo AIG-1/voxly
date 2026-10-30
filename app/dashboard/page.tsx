@@ -148,7 +148,6 @@ export default async function DashboardPage() {
            <a
              href="/dashboard/calls"
             style={{ fontSize: "13px", color: "var(--accent-2)", opacity: 0.9 }}
-             </a>
             View all
           </a>
         </div>
